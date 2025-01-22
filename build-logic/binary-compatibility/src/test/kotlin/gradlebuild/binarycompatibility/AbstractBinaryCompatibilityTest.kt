@@ -113,7 +113,6 @@ abstract class AbstractBinaryCompatibilityTest {
                     package com.example
 
                     import org.gradle.api.Incubating
-                    import javax.annotation.Nullable
 
                     $v1
                     """
@@ -126,7 +125,6 @@ abstract class AbstractBinaryCompatibilityTest {
                     package com.example
 
                     import org.gradle.api.Incubating
-                    import javax.annotation.Nullable
 
                     $v2
                     """
@@ -145,7 +143,6 @@ abstract class AbstractBinaryCompatibilityTest {
                     package com.example;
 
                     import org.gradle.api.Incubating;
-                    import javax.annotation.Nullable;
 
                     $v1
                     """
@@ -158,7 +155,6 @@ abstract class AbstractBinaryCompatibilityTest {
                     package com.example;
 
                     import org.gradle.api.Incubating;
-                    import javax.annotation.Nullable;
 
                     $v2
                     """
@@ -271,6 +267,7 @@ abstract class AbstractBinaryCompatibilityTest {
                         dependencies {
                             "implementation"(gradleApi())
                             "implementation"(kotlin("stdlib"))
+                            "implementation"("org.jspecify:jspecify:1.0.0") // TODO remove once wrapper updated
                         }
                     }
                     project(":v1") {

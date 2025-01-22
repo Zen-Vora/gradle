@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-/**
- * Types related to artifact type definitions.
- *
- * @since 4.0
- */
-@org.jspecify.annotations.NullMarked
-package org.gradle.api.artifacts.type;
+package gradlebuild.binarycompatibility
+
+class JavaxAnnotationNullabilityChangesTest : AbstractJavaNullabilityChangesTest() {
+    override val nullableAnnotationName: String = "javax.annotation.Nullable"
+}

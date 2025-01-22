@@ -14,8 +14,10 @@ dependencies {
     implementation("com.google.code.gson:gson")
     implementation("com.google.guava:guava")
     implementation("org.javassist:javassist")
+    implementation("org.ow2.asm:asm")
     implementation("com.github.javaparser:javaparser-core")
     implementation("org.jetbrains.kotlinx:kotlinx-metadata-jvm")
+    implementation("org.jspecify:jspecify")
     implementation(kotlin("compiler-embeddable"))
 
     testImplementation("org.jsoup:jsoup")
