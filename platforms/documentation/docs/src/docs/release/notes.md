@@ -69,6 +69,24 @@ The new capability addresses a common scenario: resolving files shared across al
 
 Refer to [`ProjectLayout.getSettingsDirectory()`](org/gradle/api/file/ProjectLayout.html#getSettingsDirectory()) for additional details.
 
+#### Configurations are initialized lazily
+
+Similar to [Tasks](userguide/lazy_configuration.html), Configurations are now initialized lazily when necessary.
+
+Starting with this release, applying the `Base` plugin or any of its derived plugins (e.g., JVM plugins) will not cause configurations declared using `register` or using the incubating role-based factory methods to be eagerly realized unless required.
+
+Configurations should be declared using the `register` method instead of the `create` method to take advantage of the lazy initialization.
+
+```kotlin
+configurations {
+    // Instead of using `create`
+    create("myEagerConfiguration")
+    
+    // Use `register` to lazily initialize the configuration
+    register("myLazyConfiguration")
+}
+```
+
 #### New Artifact Transforms report task
 
 A new `artifactTransforms` report is available by default, providing information about all the registered [Artifact Transforms](userguide/artifact_transforms.html) in a project.
@@ -137,7 +155,7 @@ Custom tests can include metadata to provide supplementary information about tes
 The metadata is displayed in the HTML test report for better visibility:
 
 ```java
-test.metadata(Instant.now(),"Parent class:", String.valueOf(result.getTestIdentifier().getParentId().get()));
+test.metadata(Instant.now(), "Parent class:", String.valueOf(result.getTestIdentifier().getParentId().get()));
 ```
 
 ![Test API Metadata Example](release-notes-assets/TEST_API_metadata.png)
@@ -184,19 +202,6 @@ Previously, the console printed the incorrect suggestion:
 ```text
 Run with --stacktrace to get the full stack trace of this deprecation warning.
 ```
-
-<a name="build-authoring"></a>
-### Build authoring improvements
-
-Gradle provides rich APIs for plugin authors and build engineers to develop custom build logic.
-
-#### Configurations are initialized lazily
-
-Similar to Tasks, Configurations are now initialized lazily, only when necessary.
-
-Now, when applying the `Base` plugin or any plugins derived from it such as the JVM plugins, configurations that are lazily declared using `register` or through the incubating role-based factory methods will no longer be eagerly realized unless required.
-
-Configurations should be declared using the `register` method instead of the `create` method to take advantage of the lazy initialization.
 
 ## Promoted features
 
