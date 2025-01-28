@@ -30,7 +30,7 @@ import java.util.LinkedHashSet;
 public abstract class DefaultTestFilter implements TestFilter {
 
     public DefaultTestFilter() {
-        getFailOnNoMatchingTests().set(true);
+        getFailOnNoMatchingTests().convention(true);
     }
 
     @Override
