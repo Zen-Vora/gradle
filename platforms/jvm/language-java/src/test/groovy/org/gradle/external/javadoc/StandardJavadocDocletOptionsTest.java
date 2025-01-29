@@ -18,6 +18,7 @@ package org.gradle.external.javadoc;
 
 import org.gradle.test.fixtures.file.TestFile;
 import org.gradle.test.fixtures.file.TestNameTestDirectoryProvider;
+import org.gradle.util.TestUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -49,13 +50,13 @@ public class StandardJavadocDocletOptionsTest {
 
     @Before
     public void setUp() {
-        options = new StandardJavadocDocletOptions();
+        options = TestUtil.newInstance(StandardJavadocDocletOptions.class);
     }
 
     @Test
     public void testDefaults() {
         // core javadoc options
-        assertNull(options.getOverview());
+        assertNull(options.getOverview().getOrNull());
         assertNull(options.getMemberLevel());
         assertNull(options.getDoclet());
         assertEmpty(options.getDocletpath());
@@ -111,7 +112,7 @@ public class StandardJavadocDocletOptionsTest {
     public void testFluentOverview() {
         final String overviewValue = "overview";
         assertEquals(options, options.overview(overviewValue));
-        assertEquals(overviewValue, options.getOverview());
+        assertEquals(overviewValue, options.getOverview().get());
     }
 
     @Test

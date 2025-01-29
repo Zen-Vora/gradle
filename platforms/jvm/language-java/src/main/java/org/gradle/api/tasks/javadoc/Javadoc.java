@@ -114,7 +114,7 @@ import static org.gradle.util.internal.GUtil.isTrue;
 @CacheableTask
 public abstract class Javadoc extends SourceTask {
 
-    private final StandardJavadocDocletOptions options = new StandardJavadocDocletOptions();
+    private final StandardJavadocDocletOptions options;
     private final ModularitySpec modularity;
     private final Property<JavadocTool> javadocTool;
     private final Provider<Directory> optionsDestinationDir;
@@ -122,6 +122,7 @@ public abstract class Javadoc extends SourceTask {
 
     public Javadoc() {
         ObjectFactory objectFactory = getObjectFactory();
+        this.options = objectFactory.newInstance(StandardJavadocDocletOptions.class);
         this.modularity = objectFactory.newInstance(DefaultModularitySpec.class);
         JavaToolchainService javaToolchainService = getJavaToolchainService();
         Provider<JavadocTool> javadocToolConvention = getProviderFactory()
@@ -146,7 +147,7 @@ public abstract class Javadoc extends SourceTask {
             throw new UncheckedIOException(ex);
         }
 
-        StandardJavadocDocletOptions options = new StandardJavadocDocletOptions((StandardJavadocDocletOptions) getOptions());
+        StandardJavadocDocletOptions options = getObjectFactory().newInstance(StandardJavadocDocletOptions.class).copy((StandardJavadocDocletOptions) getOptions());
 
         if (options.getDestinationDirectory() == null) {
             options.destinationDirectory(destinationDir);

@@ -16,6 +16,8 @@
 
 package org.gradle.external.javadoc;
 
+import org.gradle.api.file.ConfigurableFileCollection;
+import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Classpath;
 import org.gradle.api.tasks.Console;
 import org.gradle.api.tasks.IgnoreEmptyDirectories;
@@ -25,6 +27,7 @@ import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
+import org.gradle.internal.instrumentation.api.annotations.ReplacesEagerProperty;
 import org.gradle.internal.instrumentation.api.annotations.ToBeReplacedByLazyProperty;
 import org.gradle.process.ExecSpec;
 
@@ -37,19 +40,17 @@ import java.util.List;
  * Provides the core Javadoc options.
  */
 public interface MinimalJavadocOptions {
-    @ToBeReplacedByLazyProperty
-    @Nullable @Optional @Input
-    String getOverview();
-
-    void setOverview(@Nullable String overview);
+    @Input
+    @Optional
+    @ReplacesEagerProperty
+    Property<String> getOverview();
 
     MinimalJavadocOptions overview(String overview);
 
-    @ToBeReplacedByLazyProperty
-    @Nullable @Optional @Input
-    JavadocMemberLevel getMemberLevel();
-
-    void setMemberLevel(@Nullable JavadocMemberLevel memberLevel);
+    @Input
+    @Optional
+    @ReplacesEagerProperty
+    Property<JavadocMemberLevel> getMemberLevel();
 
     MinimalJavadocOptions showFromPublic();
 
@@ -61,35 +62,29 @@ public interface MinimalJavadocOptions {
 
     MinimalJavadocOptions showAll();
 
-    @ToBeReplacedByLazyProperty
-    @Nullable @Optional @Input
-    String getDoclet();
-
-    void setDoclet(@Nullable String docletClass);
+    @Input
+    @Optional
+    @ReplacesEagerProperty
+    Property<String> getDoclet();
 
     MinimalJavadocOptions doclet(String docletClass);
 
     @Classpath
-    @ToBeReplacedByLazyProperty
-    List<File> getDocletpath();
-
-    void setDocletpath(List<File> docletpath);
+    @ReplacesEagerProperty
+    ConfigurableFileCollection getDocletpath();
 
     MinimalJavadocOptions docletpath(File... docletpath);
 
-    @Nullable @Optional @Input
-    @ToBeReplacedByLazyProperty
-    String getSource();
-
-    void setSource(@Nullable String source);
+    @Input
+    @Optional
+    @ReplacesEagerProperty
+    Property<String> getSource();
 
     MinimalJavadocOptions source(String source);
 
     @Internal
-    @ToBeReplacedByLazyProperty
-    List<File> getClasspath();
-
-    void setClasspath(List<File> classpath);
+    @ReplacesEagerProperty
+    ConfigurableFileCollection getClasspath();
 
     /**
      * The --module-path.
@@ -97,15 +92,8 @@ public interface MinimalJavadocOptions {
      * @since 6.4
      */
     @Internal
-    @ToBeReplacedByLazyProperty
-    List<File> getModulePath();
-
-    /**
-     * The --module-path.
-     *
-     * @since 6.4
-     */
-    void setModulePath(List<File> modulePath);
+    @ReplacesEagerProperty
+    ConfigurableFileCollection getModulePath();
 
     /**
      * The --module-path.
@@ -119,26 +107,23 @@ public interface MinimalJavadocOptions {
     MinimalJavadocOptions classpath(File... classpath);
 
     @Classpath
-    @ToBeReplacedByLazyProperty
-    List<File> getBootClasspath();
-
-    void setBootClasspath(List<File> bootClasspath);
+    @ReplacesEagerProperty
+    ConfigurableFileCollection getBootClasspath();
 
     MinimalJavadocOptions bootClasspath(File... bootClasspath);
 
-    @ToBeReplacedByLazyProperty
-    @Nullable @Optional @IgnoreEmptyDirectories @PathSensitive(PathSensitivity.RELATIVE) @InputFiles
-    List<File> getExtDirs();
-
-    void setExtDirs(@Nullable List<File> extDirs);
+    @InputFiles
+    @Optional
+    @IgnoreEmptyDirectories
+    @PathSensitive(PathSensitivity.RELATIVE)
+    @ReplacesEagerProperty
+    ConfigurableFileCollection getExtDirs();
 
     MinimalJavadocOptions extDirs(File... extDirs);
 
     @Console
-    @ToBeReplacedByLazyProperty
-    JavadocOutputLevel getOutputLevel();
-
-    void setOutputLevel(JavadocOutputLevel outputLevel);
+    @ReplacesEagerProperty
+    Property<JavadocOutputLevel> getOutputLevel();
 
     MinimalJavadocOptions verbose();
 

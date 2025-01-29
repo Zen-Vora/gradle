@@ -16,6 +16,8 @@
 
 package org.gradle.external.javadoc.internal;
 
+import org.gradle.api.file.ConfigurableFileCollection;
+import org.gradle.api.provider.Property;
 import org.gradle.external.javadoc.JavadocOptionFileOption;
 import org.gradle.external.javadoc.OptionLessJavadocOptionFileOption;
 import org.gradle.internal.Cast;
@@ -77,6 +79,15 @@ public class JavadocOptionFile {
     public JavadocOptionFileOption<String> addStringOption(String option) {
         return addStringOption(option, null);
     }
+
+    public JavadocOptionFileOption<Property<?>> addPropertyOption(String option, Property<?> value) {
+        return addOption(new PropertyJavadocOptionFileOption(option, value));
+    }
+
+    public JavadocOptionFileOption<ConfigurableFileCollection> addConfigurableFileCollectionOption(String option, ConfigurableFileCollection value) {
+        return addOption(new ConfigurableFileCollectionJavadocOptionFileOption(option, value));
+    }
+
 
     public JavadocOptionFileOption<String> addStringOption(String option, String value) {
         return addOption(new StringJavadocOptionFileOption(option, value));
@@ -149,6 +160,7 @@ public class JavadocOptionFile {
     }
 
     public Map<String, String> stringifyExtraOptionsToMap(Set<String> optionsToExclude) {
+        // TODO: Fix this for Gradle 9.0
         return options.entrySet().stream()
                 .filter(entry -> !optionsToExclude.contains(entry.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> String.valueOf(entry.getValue().getValue())));

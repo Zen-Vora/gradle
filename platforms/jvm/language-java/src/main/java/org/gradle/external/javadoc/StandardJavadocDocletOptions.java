@@ -16,7 +16,6 @@
 
 package org.gradle.external.javadoc;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.gradle.api.Incubating;
 import org.gradle.api.tasks.Classpath;
@@ -30,6 +29,7 @@ import org.gradle.external.javadoc.internal.LinksOfflineJavadocOptionFileOption;
 import org.gradle.internal.instrumentation.api.annotations.ToBeReplacedByLazyProperty;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,7 +45,7 @@ import static org.gradle.api.tasks.PathSensitivity.NAME_ONLY;
 /**
  * Provides the options for the standard Javadoc doclet.
  */
-public class StandardJavadocDocletOptions extends CoreJavadocOptions implements MinimalJavadocOptions {
+public abstract class StandardJavadocDocletOptions extends CoreJavadocOptions implements MinimalJavadocOptions {
     private static final String OPTION_D = "d";
     private static final String OPTION_USE = "use";
     private static final String OPTION_VERSION = "version";
@@ -82,41 +82,41 @@ public class StandardJavadocDocletOptions extends CoreJavadocOptions implements 
     private static final String OPTION_NOTIMESTAMP = "notimestamp";
     private static final String OPTION_NOCOMMENT = "nocomment";
 
-    private final JavadocOptionFileOption<File> destinationDirectory;
-    private final JavadocOptionFileOption<Boolean> use;
-    private final JavadocOptionFileOption<Boolean> version;
-    private final JavadocOptionFileOption<Boolean> author;
-    private final JavadocOptionFileOption<Boolean> splitIndex;
-    private final JavadocOptionFileOption<String> windowTitle;
-    private final JavadocOptionFileOption<String> header;
-    private final JavadocOptionFileOption<String> docTitle;
-    private final JavadocOptionFileOption<String> footer;
-    private final JavadocOptionFileOption<String> bottom;
-    private final JavadocOptionFileOption<List<String>> links;
-    private final JavadocOptionFileOption<List<JavadocOfflineLink>> linksOffline;
-    private final JavadocOptionFileOption<Boolean> linkSource;
-    private final JavadocOptionFileOption<Map<String, List<String>>> groups;
-    private final JavadocOptionFileOption<Boolean> noDeprecated;
-    private final JavadocOptionFileOption<Boolean> noDeprecatedList;
-    private final JavadocOptionFileOption<Boolean> noSince;
-    private final JavadocOptionFileOption<Boolean> noTree;
-    private final JavadocOptionFileOption<Boolean> noIndex;
-    private final JavadocOptionFileOption<Boolean> noHelp;
-    private final JavadocOptionFileOption<Boolean> noNavBar;
-    private final JavadocOptionFileOption<File> helpFile;
-    private final JavadocOptionFileOption<File> stylesheetFile;
-    private final JavadocOptionFileOption<Boolean> serialWarn;
-    private final JavadocOptionFileOption<String> charSet;
-    private final JavadocOptionFileOption<String> docEncoding;
-    private final JavadocOptionFileOption<Boolean> keyWords;
-    private final JavadocOptionFileOption<List<String>> tags;
-    private final JavadocOptionFileOption<List<String>> taglets;
-    private final JavadocOptionFileOption<List<File>> tagletPath;
-    private final JavadocOptionFileOption<Boolean> docFilesSubDirs;
-    private final JavadocOptionFileOption<List<String>> excludeDocFilesSubDir;
-    private final JavadocOptionFileOption<List<String>> noQualifiers;
-    public final JavadocOptionFileOption<Boolean> noTimestamp;
-    private final JavadocOptionFileOption<Boolean> noComment;
+    private JavadocOptionFileOption<File> destinationDirectory;
+    private JavadocOptionFileOption<Boolean> use;
+    private JavadocOptionFileOption<Boolean> version;
+    private JavadocOptionFileOption<Boolean> author;
+    private JavadocOptionFileOption<Boolean> splitIndex;
+    private JavadocOptionFileOption<String> windowTitle;
+    private JavadocOptionFileOption<String> header;
+    private JavadocOptionFileOption<String> docTitle;
+    private JavadocOptionFileOption<String> footer;
+    private JavadocOptionFileOption<String> bottom;
+    private JavadocOptionFileOption<List<String>> links;
+    private JavadocOptionFileOption<List<JavadocOfflineLink>> linksOffline;
+    private JavadocOptionFileOption<Boolean> linkSource;
+    private JavadocOptionFileOption<Map<String, List<String>>> groups;
+    private JavadocOptionFileOption<Boolean> noDeprecated;
+    private JavadocOptionFileOption<Boolean> noDeprecatedList;
+    private JavadocOptionFileOption<Boolean> noSince;
+    private JavadocOptionFileOption<Boolean> noTree;
+    private JavadocOptionFileOption<Boolean> noIndex;
+    private JavadocOptionFileOption<Boolean> noHelp;
+    private JavadocOptionFileOption<Boolean> noNavBar;
+    private JavadocOptionFileOption<File> helpFile;
+    private JavadocOptionFileOption<File> stylesheetFile;
+    private JavadocOptionFileOption<Boolean> serialWarn;
+    private JavadocOptionFileOption<String> charSet;
+    private JavadocOptionFileOption<String> docEncoding;
+    private JavadocOptionFileOption<Boolean> keyWords;
+    private JavadocOptionFileOption<List<String>> tags;
+    private JavadocOptionFileOption<List<String>> taglets;
+    private JavadocOptionFileOption<List<File>> tagletPath;
+    private JavadocOptionFileOption<Boolean> docFilesSubDirs;
+    private JavadocOptionFileOption<List<String>> excludeDocFilesSubDir;
+    private JavadocOptionFileOption<List<String>> noQualifiers;
+    public JavadocOptionFileOption<Boolean> noTimestamp;
+    private JavadocOptionFileOption<Boolean> noComment;
 
     /**
      * Standard options which are known, and have corresponding fields in this class.
@@ -124,13 +124,14 @@ public class StandardJavadocDocletOptions extends CoreJavadocOptions implements 
      * @since 7.5
      */
     @Incubating
-    private final Set<String> knownStandardOptionNames;
+    private Set<String> knownStandardOptionNames;
 
+    @Inject
     public StandardJavadocDocletOptions() {
         this(new JavadocOptionFile());
     }
 
-    public StandardJavadocDocletOptions(JavadocOptionFile javadocOptionFile) {
+    private StandardJavadocDocletOptions(JavadocOptionFile javadocOptionFile) {
         super(javadocOptionFile);
 
         destinationDirectory = addFileOption(OPTION_D);
@@ -172,81 +173,13 @@ public class StandardJavadocDocletOptions extends CoreJavadocOptions implements 
         knownStandardOptionNames = Collections.unmodifiableSet(new HashSet<>(Sets.difference(optionFile.getOptions().keySet(), knownCoreOptionNames)));
     }
 
+    @SuppressWarnings("unused")
     public StandardJavadocDocletOptions(StandardJavadocDocletOptions original) {
         this(original, new JavadocOptionFile(original.optionFile));
     }
 
-    public StandardJavadocDocletOptions(StandardJavadocDocletOptions original, JavadocOptionFile optionFile) {
-        super(original, optionFile);
-
-        destinationDirectory = optionFile.getOption(OPTION_D);
-        use = optionFile.getOption(OPTION_USE);
-        version = optionFile.getOption(OPTION_VERSION);
-        author = optionFile.getOption(OPTION_AUTHOR);
-        splitIndex = optionFile.getOption(OPTION_SPLITINDEX);
-        header = optionFile.getOption(OPTION_HEADER);
-        windowTitle = optionFile.getOption(OPTION_WINDOWTITLE);
-        docTitle = optionFile.getOption(OPTION_DOCTITLE);
-        footer = optionFile.getOption(OPTION_FOOTER);
-        bottom = optionFile.getOption(OPTION_BOTTOM);
-        links = optionFile.getOption(OPTION_LINK);
-        linksOffline = optionFile.getOption(OPTION_LINKOFFLINE);
-        linkSource = optionFile.getOption(OPTION_LINKSOURCE);
-        groups = optionFile.getOption(OPTION_GROUP);
-        noDeprecated = optionFile.getOption(OPTION_NODEPRECATED);
-        noDeprecatedList = optionFile.getOption(OPTION_NODEPRECATEDLIST);
-        noSince = optionFile.getOption(OPTION_NOSINCE);
-        noTree = optionFile.getOption(OPTION_NOTREE);
-        noIndex = optionFile.getOption(OPTION_NOINDEX);
-        noHelp = optionFile.getOption(OPTION_NOHELP);
-        noNavBar = optionFile.getOption(OPTION_NONAVBAR);
-        helpFile = optionFile.getOption(OPTION_HELPFILE);
-        stylesheetFile = optionFile.getOption(OPTION_STYLESHEETFILE);
-        serialWarn = optionFile.getOption(OPTION_SERIALWARN);
-        charSet = optionFile.getOption(OPTION_CHARSET);
-        docEncoding = optionFile.getOption(OPTION_DOENCODING);
-        keyWords = optionFile.getOption(OPTION_KEYWORDS);
-        tags = optionFile.getOption(OPTION_TAG);
-        taglets = optionFile.getOption(OPTION_TAGLET);
-        tagletPath = optionFile.getOption(OPTION_TAGLETPATH);
-        docFilesSubDirs = optionFile.getOption(OPTION_DOCFILESSUBDIRS);
-        excludeDocFilesSubDir = optionFile.getOption(OPTION_EXCLUDEDOCFILESSUBDIR);
-        noQualifiers = optionFile.getOption(OPTION_NOQUALIFIER);
-        noTimestamp = optionFile.getOption(OPTION_NOTIMESTAMP);
-        noComment = optionFile.getOption(OPTION_NOCOMMENT);
-
-        knownStandardOptionNames = original.knownStandardOptionNames;
-    }
-
-    public StandardJavadocDocletOptions(MinimalJavadocOptions original) {
-        this();
-
-        setOverview(original.getOverview());
-        setMemberLevel(original.getMemberLevel());
-        setDoclet(original.getDoclet());
-        setDocletpath(copyOrNull(original.getDocletpath()));
-        setSource(original.getSource());
-        setClasspath(copyOrNull(original.getClasspath()));
-        setBootClasspath(copyOrNull(original.getBootClasspath()));
-        setExtDirs(copyOrNull(original.getExtDirs()));
-        setOutputLevel(original.getOutputLevel());
-        setBreakIterator(original.isBreakIterator());
-        setLocale(original.getLocale());
-        setEncoding(original.getEncoding());
-        setJFlags(copyOrNull(original.getJFlags()));
-        setOptionFiles(copyOrNull(original.getOptionFiles()));
-        setDestinationDirectory(original.getDestinationDirectory());
-        setWindowTitle(original.getWindowTitle());
-        setHeader(original.getHeader());
-        setSourceNames(copyOrNull(original.getSourceNames()));
-    }
-
-    private static <T> List<T> copyOrNull(List<T> items) {
-        if (items == null) {
-            return null;
-        } else {
-            return Lists.newArrayList(items);
-        }
+    private StandardJavadocDocletOptions(StandardJavadocDocletOptions original, JavadocOptionFile optionFile) {
+        copy(original, optionFile);
     }
 
     /**
@@ -1206,5 +1139,51 @@ public class StandardJavadocDocletOptions extends CoreJavadocOptions implements 
 
     public StandardJavadocDocletOptions noComment() {
         return noComment(true);
+    }
+
+    public StandardJavadocDocletOptions copy(StandardJavadocDocletOptions original) {
+        return copy(original, new JavadocOptionFile(original.optionFile));
+    }
+
+    private StandardJavadocDocletOptions copy(StandardJavadocDocletOptions original, JavadocOptionFile optionFile) {
+        super.copy(original, optionFile);
+        destinationDirectory = optionFile.getOption(OPTION_D);
+        use = optionFile.getOption(OPTION_USE);
+        version = optionFile.getOption(OPTION_VERSION);
+        author = optionFile.getOption(OPTION_AUTHOR);
+        splitIndex = optionFile.getOption(OPTION_SPLITINDEX);
+        header = optionFile.getOption(OPTION_HEADER);
+        windowTitle = optionFile.getOption(OPTION_WINDOWTITLE);
+        docTitle = optionFile.getOption(OPTION_DOCTITLE);
+        footer = optionFile.getOption(OPTION_FOOTER);
+        bottom = optionFile.getOption(OPTION_BOTTOM);
+        links = optionFile.getOption(OPTION_LINK);
+        linksOffline = optionFile.getOption(OPTION_LINKOFFLINE);
+        linkSource = optionFile.getOption(OPTION_LINKSOURCE);
+        groups = optionFile.getOption(OPTION_GROUP);
+        noDeprecated = optionFile.getOption(OPTION_NODEPRECATED);
+        noDeprecatedList = optionFile.getOption(OPTION_NODEPRECATEDLIST);
+        noSince = optionFile.getOption(OPTION_NOSINCE);
+        noTree = optionFile.getOption(OPTION_NOTREE);
+        noIndex = optionFile.getOption(OPTION_NOINDEX);
+        noHelp = optionFile.getOption(OPTION_NOHELP);
+        noNavBar = optionFile.getOption(OPTION_NONAVBAR);
+        helpFile = optionFile.getOption(OPTION_HELPFILE);
+        stylesheetFile = optionFile.getOption(OPTION_STYLESHEETFILE);
+        serialWarn = optionFile.getOption(OPTION_SERIALWARN);
+        charSet = optionFile.getOption(OPTION_CHARSET);
+        docEncoding = optionFile.getOption(OPTION_DOENCODING);
+        keyWords = optionFile.getOption(OPTION_KEYWORDS);
+        tags = optionFile.getOption(OPTION_TAG);
+        taglets = optionFile.getOption(OPTION_TAGLET);
+        tagletPath = optionFile.getOption(OPTION_TAGLETPATH);
+        docFilesSubDirs = optionFile.getOption(OPTION_DOCFILESSUBDIRS);
+        excludeDocFilesSubDir = optionFile.getOption(OPTION_EXCLUDEDOCFILESSUBDIR);
+        noQualifiers = optionFile.getOption(OPTION_NOQUALIFIER);
+        noTimestamp = optionFile.getOption(OPTION_NOTIMESTAMP);
+        noComment = optionFile.getOption(OPTION_NOCOMMENT);
+
+        knownStandardOptionNames = original.knownStandardOptionNames;
+        return this;
     }
 }
