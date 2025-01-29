@@ -65,7 +65,7 @@ public class StandardJavadocDocletOptionsTest {
         assertEmpty(options.getBootClasspath());
         assertEmpty(options.getExtDirs());
         assertEquals(options.getOutputLevel(), JavadocOutputLevel.QUIET);
-        assertFalse(options.isBreakIterator());
+        assertFalse(options.getBreakIterator());
         assertNull(options.getLocale());
         assertNull(options.getEncoding());
         assertEmpty(options.getJFlags());
@@ -203,7 +203,7 @@ public class StandardJavadocDocletOptionsTest {
     @Test
     public void testFluentBreakIterator() {
         assertEquals(options, options.breakIterator());
-        assertTrue(options.isBreakIterator());
+        assertTrue(options.getBreakIterator());
     }
 
     @Test

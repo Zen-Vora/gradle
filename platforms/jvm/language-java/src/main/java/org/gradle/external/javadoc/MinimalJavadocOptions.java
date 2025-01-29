@@ -17,6 +17,7 @@
 package org.gradle.external.javadoc;
 
 import org.gradle.api.file.ConfigurableFileCollection;
+import org.gradle.api.internal.provider.ProviderApiDeprecationLogger;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Classpath;
 import org.gradle.api.tasks.Console;
@@ -134,28 +135,34 @@ public interface MinimalJavadocOptions {
     MinimalJavadocOptions quiet();
 
     @Input
-    @ToBeReplacedByLazyProperty
-    boolean isBreakIterator();
+    @ReplacesEagerProperty
+    Property<Boolean> getBreakIterator();
 
-    void setBreakIterator(boolean breakIterator);
+    /**
+     * This method exists only for Kotlin source backward compatibility.
+     */
+    @Internal
+    @Deprecated
+    default Property<Boolean> getIsBreakIterator() {
+        ProviderApiDeprecationLogger.logDeprecation(MinimalJavadocOptions.class, "getIsBreakIterator()", "getBreakIterator()");
+        return getBreakIterator();
+    }
 
     MinimalJavadocOptions breakIterator(boolean breakIterator);
 
     MinimalJavadocOptions breakIterator();
 
-    @ToBeReplacedByLazyProperty
-    @Nullable @Optional @Input
-    String getLocale();
-
-    void setLocale(@Nullable String locale);
+    @Input
+    @Optional
+    @ReplacesEagerProperty
+    Property<String> getLocale();
 
     MinimalJavadocOptions locale(String locale);
 
-    @ToBeReplacedByLazyProperty
-    @Nullable @Optional @Input
-    String getEncoding();
-
-    void setEncoding(@Nullable String encoding);
+    @Input
+    @Optional
+    @ReplacesEagerProperty
+    Property<String> getEncoding();
 
     MinimalJavadocOptions encoding(String encoding);
 

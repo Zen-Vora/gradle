@@ -173,15 +173,6 @@ public abstract class StandardJavadocDocletOptions extends CoreJavadocOptions im
         knownStandardOptionNames = Collections.unmodifiableSet(new HashSet<>(Sets.difference(optionFile.getOptions().keySet(), knownCoreOptionNames)));
     }
 
-    @SuppressWarnings("unused")
-    public StandardJavadocDocletOptions(StandardJavadocDocletOptions original) {
-        this(original, new JavadocOptionFile(original.optionFile));
-    }
-
-    private StandardJavadocDocletOptions(StandardJavadocDocletOptions original, JavadocOptionFile optionFile) {
-        copy(original, optionFile);
-    }
-
     /**
      * Gets a set of all the options that are known to this class and its super class and have separate properties.
      *

@@ -33,6 +33,8 @@ public class PropertyJavadocOptionFileOption extends AbstractJavadocOptionFileOp
                 new EnumJavadocOptionFileOption<>(option, rawValue).write(writerContext);
             } else if (rawValue instanceof String) {
                 new StringJavadocOptionFileOption(option, (String) rawValue).write(writerContext);
+            } else if (rawValue instanceof Boolean) {
+                new BooleanJavadocOptionFileOption(option, (Boolean) rawValue).write(writerContext);
             } else {
                 throw new UnsupportedOperationException("Unsupported property type: " + rawValue.getClass());
             }

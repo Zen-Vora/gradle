@@ -60,9 +60,6 @@ public abstract class CoreJavadocOptions implements MinimalJavadocOptions {
 
     protected JavadocOptionFile optionFile;
 
-    private JavadocOptionFileOption<Boolean> breakIterator;
-    private JavadocOptionFileOption<String> locale;
-    private JavadocOptionFileOption<String> encoding;
     private OptionLessJavadocOptionFileOption<List<String>> sourceNames;
     private List<String> jFlags = new ArrayList<>();
     private List<File> optionFiles = new ArrayList<>();
@@ -81,28 +78,10 @@ public abstract class CoreJavadocOptions implements MinimalJavadocOptions {
 
     protected CoreJavadocOptions(JavadocOptionFile optionFile) {
         this.optionFile = optionFile;
-
-        addPropertyOption(OPTION_OVERVIEW, getOverview());
-        addPropertyOption(OPTION_MEMBERLEVEL, getMemberLevel());
-        addPropertyOption(OPTION_DOCLET, getDoclet());
-        addConfigurableFileCollectionOption(OPTION_DOCLETPATH, getDocletpath());
-        addPropertyOption(OPTION_SOURCE, getSource());
-        addConfigurableFileCollectionOption(OPTION_CLASSPATH, getClasspath());
-        addConfigurableFileCollectionOption(OPTION_MODULE_PATH, getModulePath());
-        addConfigurableFileCollectionOption(OPTION_BOOTCLASSPATH, getBootClasspath());
-        addConfigurableFileCollectionOption(OPTION_EXTDIRS, getExtDirs());
-        addPropertyOption(OPTION_OUTPUTLEVEL, getOutputLevel());
-        breakIterator = addBooleanOption(OPTION_BREAKITERATOR);
-        locale = addStringOption(OPTION_LOCALE);
-        encoding = addStringOption(OPTION_ENCODING);
-
+        wireMethodsToOptionFile();
         sourceNames = optionFile.getSourceNames();
-
         knownCoreOptionNames = Collections.unmodifiableSet(new HashSet<>(optionFile.getOptions().keySet()));
-    }
-
-    protected CoreJavadocOptions(CoreJavadocOptions original, JavadocOptionFile optionFile) {
-        copy(original, optionFile);
+        getBreakIterator().convention(false);
     }
 
     /**
@@ -392,25 +371,17 @@ public abstract class CoreJavadocOptions implements MinimalJavadocOptions {
      *           We regret any extra work and confusion this has caused.
      */
     @Override
-    @ToBeReplacedByLazyProperty
-    public boolean isBreakIterator() {
-        return breakIterator.getValue();
-    }
-
-    @Override
-    public void setBreakIterator(boolean breakIterator) {
-        this.breakIterator.setValue(breakIterator);
-    }
+    public abstract Property<Boolean> getBreakIterator();
 
     @Override
     public MinimalJavadocOptions breakIterator(boolean breakIterator) {
-        setBreakIterator(breakIterator);
+        getBreakIterator().set(breakIterator);
         return this;
     }
 
     @Override
     public MinimalJavadocOptions breakIterator() {
-        setBreakIterator(true);
+        breakIterator(true);
         return this;
     }
 
@@ -433,19 +404,11 @@ public abstract class CoreJavadocOptions implements MinimalJavadocOptions {
      * It does not determine the locale of the doc comment text specified in the source files of the documented classes.
      */
     @Override
-    @ToBeReplacedByLazyProperty
-    public String getLocale() {
-        return locale.getValue();
-    }
-
-    @Override
-    public void setLocale(String locale) {
-        this.locale.setValue(locale);
-    }
+    public abstract Property<String> getLocale();
 
     @Override
     public MinimalJavadocOptions locale(String locale) {
-        setLocale(locale);
+        getLocale().set(locale);
         return this;
     }
 
@@ -457,19 +420,11 @@ public abstract class CoreJavadocOptions implements MinimalJavadocOptions {
      * Also see -docencoding and -charset.
      */
     @Override
-    @ToBeReplacedByLazyProperty
-    public String getEncoding() {
-        return encoding.getValue();
-    }
-
-    @Override
-    public void setEncoding(String encoding) {
-        this.encoding.setValue(encoding);
-    }
+    public abstract Property<String> getEncoding();
 
     @Override
     public MinimalJavadocOptions encoding(String encoding) {
-        setEncoding(encoding);
+        getEncoding().set(encoding);
         return this;
     }
 
@@ -685,7 +640,6 @@ public abstract class CoreJavadocOptions implements MinimalJavadocOptions {
     @SuppressWarnings("unchecked")
     protected CoreJavadocOptions copy(CoreJavadocOptions original, JavadocOptionFile optionFile) {
         this.optionFile = optionFile;
-
         getOverview().set((Provider<String>) optionFile.getOption(OPTION_OVERVIEW).getValue());
         getMemberLevel().set((Provider<JavadocMemberLevel>) optionFile.getOption(OPTION_MEMBERLEVEL).getValue());
         getDoclet().set((Provider<String>) optionFile.getOption(OPTION_DOCLET).getValue());
@@ -696,9 +650,11 @@ public abstract class CoreJavadocOptions implements MinimalJavadocOptions {
         getBootClasspath().setFrom(optionFile.getOption(OPTION_BOOTCLASSPATH).getValue());
         getExtDirs().setFrom(optionFile.getOption(OPTION_EXTDIRS).getValue());
         getOutputLevel().set((Provider<JavadocOutputLevel>) optionFile.getOption(OPTION_OUTPUTLEVEL).getValue());
-        breakIterator = optionFile.getOption(OPTION_BREAKITERATOR);
-        locale = optionFile.getOption(OPTION_LOCALE);
-        encoding = optionFile.getOption(OPTION_ENCODING);
+        getBreakIterator().set((Provider<Boolean>) optionFile.getOption(OPTION_BREAKITERATOR).getValue());
+        getLocale().set((Provider<String>) optionFile.getOption(OPTION_LOCALE).getValue());
+        getEncoding().set((Provider<String>) optionFile.getOption(OPTION_ENCODING).getValue());
+
+        wireMethodsToOptionFile();
 
         sourceNames = optionFile.getSourceNames();
         jFlags = original.jFlags;
@@ -706,5 +662,21 @@ public abstract class CoreJavadocOptions implements MinimalJavadocOptions {
 
         knownCoreOptionNames = original.knownCoreOptionNames;
         return this;
+    }
+
+    private void wireMethodsToOptionFile() {
+        addPropertyOption(OPTION_OVERVIEW, getOverview());
+        addPropertyOption(OPTION_MEMBERLEVEL, getMemberLevel());
+        addPropertyOption(OPTION_DOCLET, getDoclet());
+        addConfigurableFileCollectionOption(OPTION_DOCLETPATH, getDocletpath());
+        addPropertyOption(OPTION_SOURCE, getSource());
+        addConfigurableFileCollectionOption(OPTION_CLASSPATH, getClasspath());
+        addConfigurableFileCollectionOption(OPTION_MODULE_PATH, getModulePath());
+        addConfigurableFileCollectionOption(OPTION_BOOTCLASSPATH, getBootClasspath());
+        addConfigurableFileCollectionOption(OPTION_EXTDIRS, getExtDirs());
+        addPropertyOption(OPTION_OUTPUTLEVEL, getOutputLevel());
+        addPropertyOption(OPTION_BREAKITERATOR, getBreakIterator());
+        addPropertyOption(OPTION_LOCALE, getLocale());
+        addPropertyOption(OPTION_ENCODING, getEncoding());
     }
 }
