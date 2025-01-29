@@ -1133,11 +1133,7 @@ public abstract class StandardJavadocDocletOptions extends CoreJavadocOptions im
     }
 
     public StandardJavadocDocletOptions copy(StandardJavadocDocletOptions original) {
-        return copy(original, new JavadocOptionFile(original.optionFile));
-    }
-
-    private StandardJavadocDocletOptions copy(StandardJavadocDocletOptions original, JavadocOptionFile optionFile) {
-        super.copy(original, optionFile);
+        super.copy(original);
         destinationDirectory = optionFile.getOption(OPTION_D);
         use = optionFile.getOption(OPTION_USE);
         version = optionFile.getOption(OPTION_VERSION);

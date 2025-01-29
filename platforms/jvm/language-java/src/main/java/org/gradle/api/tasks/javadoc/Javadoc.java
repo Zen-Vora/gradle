@@ -171,11 +171,11 @@ public abstract class Javadoc extends SourceTask {
         }
 
         String maxMemory = getMaxMemory().getOrNull();
-        if (maxMemory != null && options.getJFlags().stream().noneMatch(flag -> flag.startsWith("-Xmx"))) {
+        if (maxMemory != null && options.getJFlags().get().stream().noneMatch(flag -> flag.startsWith("-Xmx"))) {
             options.jFlags("-Xmx" + maxMemory);
         }
 
-        options.setSourceNames(sourceNames());
+        options.getSourceNames().set(sourceNames());
 
         JavadocSpec spec = createJavadocSpec(options);
         getJavadocToolAdapter().execute(spec);

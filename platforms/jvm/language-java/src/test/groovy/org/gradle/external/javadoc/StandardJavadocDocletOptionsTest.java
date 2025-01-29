@@ -50,27 +50,27 @@ public class StandardJavadocDocletOptionsTest {
 
     @Before
     public void setUp() {
-        options = TestUtil.newInstance(StandardJavadocDocletOptions.class);
+        options = TestUtil.objectFactory(temporaryFolder.getTestDirectory()).newInstance(StandardJavadocDocletOptions.class);
     }
 
     @Test
     public void testDefaults() {
         // core javadoc options
         assertNull(options.getOverview().getOrNull());
-        assertNull(options.getMemberLevel());
-        assertNull(options.getDoclet());
-        assertEmpty(options.getDocletpath());
-        assertNull(options.getSource());
-        assertEmpty(options.getClasspath());
-        assertEmpty(options.getBootClasspath());
-        assertEmpty(options.getExtDirs());
-        assertEquals(options.getOutputLevel(), JavadocOutputLevel.QUIET);
-        assertFalse(options.getBreakIterator());
-        assertNull(options.getLocale());
-        assertNull(options.getEncoding());
-        assertEmpty(options.getJFlags());
-        assertEmpty(options.getSourceNames());
-        assertEmpty(options.getOptionFiles());
+        assertNull(options.getMemberLevel().getOrNull());
+        assertNull(options.getDoclet().getOrNull());
+        assertEmpty(options.getDocletpath().getFiles());
+        assertNull(options.getSource().getOrNull());
+        assertEmpty(options.getClasspath().getFiles());
+        assertEmpty(options.getBootClasspath().getFiles());
+        assertEmpty(options.getExtDirs().getFiles());
+        assertEquals(JavadocOutputLevel.QUIET, options.getOutputLevel().get());
+        assertFalse(options.getBreakIterator().get());
+        assertNull(options.getLocale().getOrNull());
+        assertNull(options.getEncoding().getOrNull());
+        assertEmpty(options.getJFlags().get());
+        assertEmpty(options.getSourceNames().get());
+        assertEmpty(options.getOptionFiles().getFiles());
         // standard doclet options
         assertNull(options.getDestinationDirectory());
         assertFalse(options.isUse());
@@ -118,106 +118,106 @@ public class StandardJavadocDocletOptionsTest {
     @Test
     public void testShowAll() {
         assertEquals(options, options.showAll());
-        assertEquals(JavadocMemberLevel.PRIVATE, options.getMemberLevel());
+        assertEquals(JavadocMemberLevel.PRIVATE, options.getMemberLevel().get());
     }
 
     @Test
     public void testShowFromPublic() {
         assertEquals(options, options.showFromPublic());
-        assertEquals(JavadocMemberLevel.PUBLIC, options.getMemberLevel());
+        assertEquals(JavadocMemberLevel.PUBLIC, options.getMemberLevel().get());
     }
 
     @Test
     public void testShowFromPackage() {
         assertEquals(options, options.showFromPackage());
-        assertEquals(JavadocMemberLevel.PACKAGE, options.getMemberLevel());
+        assertEquals(JavadocMemberLevel.PACKAGE, options.getMemberLevel().get());
     }
 
     @Test
     public void testShowFromProtected() {
         assertEquals(options, options.showFromProtected());
-        assertEquals(JavadocMemberLevel.PROTECTED, options.getMemberLevel());
+        assertEquals(JavadocMemberLevel.PROTECTED, options.getMemberLevel().get());
     }
 
     @Test
     public void testShowFromPrivate() {
         assertEquals(options, options.showFromPrivate());
-        assertEquals(JavadocMemberLevel.PRIVATE, options.getMemberLevel());
+        assertEquals(JavadocMemberLevel.PRIVATE, options.getMemberLevel().get());
     }
 
     @Test
     public void testFluentDocletClass() {
         final String docletValue = "org.gradle.CustomDocletClass";
         assertEquals(options, options.doclet(docletValue));
-        assertEquals(docletValue, options.getDoclet());
+        assertEquals(docletValue, options.getDoclet().get());
     }
 
     @Test
     public void testFluentDocletClasspath() {
         final File[] docletClasspathValue = new File[]{new File("doclet.jar"), new File("doclet-dep.jar")};
         assertEquals(options, options.docletpath(docletClasspathValue));
-        assertArrayEquals(docletClasspathValue, options.getDocletpath().toArray());
+        assertArrayEquals(new String[]{"doclet.jar", "doclet-dep.jar"}, options.getDocletpath().getFiles().stream().map(File::getName).toArray());
     }
 
     @Test
     public void testFluentSource() {
         final String sourceValue = "1.5";
         assertEquals(options, options.source(sourceValue));
-        assertEquals(sourceValue, options.getSource());
+        assertEquals(sourceValue, options.getSource().get());
     }
 
     @Test
     public void testFluentClasspath() {
         final File[] classpathValue = new File[]{new File("classpath.jar"), new File("classpath-dir")};
         assertEquals(options, options.classpath(classpathValue));
-        assertArrayEquals(classpathValue, options.getClasspath().toArray());
+        assertArrayEquals(new String[]{"classpath.jar", "classpath-dir"}, options.getClasspath().getFiles().stream().map(File::getName).toArray());
     }
 
     @Test
     public void testFluentBootclasspath() {
         final File[] bootClasspathValue = new File[]{new File("bootclasspath.jar"), new File("bootclasspath2.jar")};
         assertEquals(options, options.bootClasspath(bootClasspathValue));
-        assertArrayEquals(bootClasspathValue, options.getBootClasspath().toArray());
+        assertArrayEquals(new String[]{"bootclasspath.jar", "bootclasspath2.jar"}, options.getBootClasspath().getFiles().stream().map(File::getName).toArray());
     }
 
     @Test
     public void testFluentExtDirs() {
         final File[] extDirsValue = new File[]{new File("extDirOne"), new File("extDirTwo")};
         assertEquals(options, options.extDirs(extDirsValue));
-        assertArrayEquals(extDirsValue, options.getExtDirs().toArray());
+        assertArrayEquals(new String[]{"extDirOne", "extDirTwo"}, options.getExtDirs().getFiles().stream().map(File::getName).toArray());
     }
 
     @Test
     public void testQuietOutputLevel() {
         assertEquals(options, options.quiet());
-        assertEquals(JavadocOutputLevel.QUIET, options.getOutputLevel());
+        assertEquals(JavadocOutputLevel.QUIET, options.getOutputLevel().get());
     }
 
     @Test
     public void testVerboseOutputLevel() {
         assertEquals(options, options.verbose());
-        assertEquals(JavadocOutputLevel.VERBOSE, options.getOutputLevel());
+        assertEquals(JavadocOutputLevel.VERBOSE, options.getOutputLevel().get());
         assertTrue(options.isVerbose());
     }
 
     @Test
     public void testFluentBreakIterator() {
         assertEquals(options, options.breakIterator());
-        assertTrue(options.getBreakIterator());
+        assertTrue(options.getBreakIterator().get());
     }
 
     @Test
     public void testFluentLocale() {
         final String localeValue = "nl";
         assertEquals(options, options.locale(localeValue));
-        assertEquals(localeValue, options.getLocale());
+        assertEquals(localeValue, options.getLocale().get());
     }
 
     @Test
     public void testFluentEncoding() {
         final String encodingValue = "UTF-8";
         assertEquals(options, options.encoding(encodingValue));
-        assertEquals(encodingValue, options.getEncoding());
+        assertEquals(encodingValue, options.getEncoding().get());
     }
 
     @Test

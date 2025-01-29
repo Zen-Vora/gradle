@@ -17,9 +17,9 @@
 package org.gradle.external.javadoc.internal;
 
 import org.gradle.api.file.ConfigurableFileCollection;
+import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.external.javadoc.JavadocOptionFileOption;
-import org.gradle.external.javadoc.OptionLessJavadocOptionFileOption;
 import org.gradle.internal.Cast;
 
 import java.io.File;
@@ -35,19 +35,16 @@ import java.util.stream.Collectors;
 public class JavadocOptionFile {
     private final Map<String, JavadocOptionFileOptionInternal<?>> options;
 
-    private final OptionLessJavadocOptionFileOptionInternal<List<String>> sourceNames;
-
     public JavadocOptionFile() {
-        this(new LinkedHashMap<>(), new OptionLessStringsJavadocOptionFileOption(new ArrayList<>()));
+        this(new LinkedHashMap<>());
     }
 
-    private JavadocOptionFile(Map<String, JavadocOptionFileOptionInternal<?>> options, OptionLessJavadocOptionFileOptionInternal<List<String>> sourceNames) {
+    private JavadocOptionFile(Map<String, JavadocOptionFileOptionInternal<?>> options) {
         this.options = options;
-        this.sourceNames = sourceNames;
     }
 
     public JavadocOptionFile(JavadocOptionFile original) {
-        this(duplicateOptions(original.options), original.sourceNames.duplicate());
+        this(duplicateOptions(original.options));
     }
 
     private static Map<String, JavadocOptionFileOptionInternal<?>> duplicateOptions(Map<String, JavadocOptionFileOptionInternal<?>> original) {
@@ -56,10 +53,6 @@ public class JavadocOptionFile {
             duplicateOptions.put(entry.getKey(), entry.getValue().duplicate());
         }
         return duplicateOptions;
-    }
-
-    public OptionLessJavadocOptionFileOption<List<String>> getSourceNames() {
-        return sourceNames;
     }
 
     public Map<String, JavadocOptionFileOptionInternal<?>> getOptions() {
@@ -137,14 +130,14 @@ public class JavadocOptionFile {
         return addOption(new FileJavadocOptionFileOption(option, value));
     }
 
-    public void write(File optionFile) throws IOException {
+    public void write(File optionFile, ListProperty<String> sourceNames) throws IOException {
         if (optionFile == null) {
             throw new IllegalArgumentException("optionFile == null!");
         }
 
         final JavadocOptionFileWriter optionFileWriter = new JavadocOptionFileWriter(this);
 
-        optionFileWriter.write(optionFile);
+        optionFileWriter.write(optionFile, sourceNames);
     }
 
     public <T> JavadocOptionFileOption<T> getOption(String option) {

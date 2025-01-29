@@ -18,6 +18,7 @@ package org.gradle.external.javadoc;
 
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.internal.provider.ProviderApiDeprecationLogger;
+import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Classpath;
 import org.gradle.api.tasks.Console;
@@ -135,7 +136,7 @@ public interface MinimalJavadocOptions {
     MinimalJavadocOptions quiet();
 
     @Input
-    @ReplacesEagerProperty
+    @ReplacesEagerProperty(originalType = boolean.class)
     Property<Boolean> getBreakIterator();
 
     /**
@@ -166,19 +167,18 @@ public interface MinimalJavadocOptions {
 
     MinimalJavadocOptions encoding(String encoding);
 
-    @ToBeReplacedByLazyProperty
-    @Nullable @Optional @Input
-    List<String> getJFlags();
-
-    void setJFlags(@Nullable List<String> jFlags);
+    @Input
+    @Optional
+    @ReplacesEagerProperty
+    ListProperty<String> getJFlags();
 
     MinimalJavadocOptions jFlags(String... jFlags);
 
-    @ToBeReplacedByLazyProperty
-    @Nullable @Optional @PathSensitive(PathSensitivity.NONE) @InputFiles
-    List<File> getOptionFiles();
-
-    void setOptionFiles(@Nullable List<File> optionFiles);
+    @InputFiles
+    @Optional
+    @PathSensitive(PathSensitivity.NONE)
+    @ReplacesEagerProperty
+    ConfigurableFileCollection getOptionFiles();
 
     MinimalJavadocOptions optionFiles(File... argumentFiles);
 
@@ -208,12 +208,9 @@ public interface MinimalJavadocOptions {
 
     void write(File outputFile) throws IOException;
 
-    @Nullable
     @Internal
-    @ToBeReplacedByLazyProperty
-    List<String> getSourceNames();
-
-    void setSourceNames(@Nullable List<String> sourceNames);
+    @ReplacesEagerProperty
+    ListProperty<String> getSourceNames();
 
     MinimalJavadocOptions sourceNames(String... sourceNames);
 

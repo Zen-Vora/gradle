@@ -18,6 +18,7 @@ package org.gradle.external.javadoc;
 
 import org.gradle.api.Incubating;
 import org.gradle.api.file.ConfigurableFileCollection;
+import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.Input;
@@ -32,7 +33,6 @@ import org.gradle.util.internal.GUtil;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -60,10 +60,6 @@ public abstract class CoreJavadocOptions implements MinimalJavadocOptions {
 
     protected JavadocOptionFile optionFile;
 
-    private OptionLessJavadocOptionFileOption<List<String>> sourceNames;
-    private List<String> jFlags = new ArrayList<>();
-    private List<File> optionFiles = new ArrayList<>();
-
     /**
      * Core options which are known, and have corresponding fields in this class.
      *
@@ -79,8 +75,8 @@ public abstract class CoreJavadocOptions implements MinimalJavadocOptions {
     protected CoreJavadocOptions(JavadocOptionFile optionFile) {
         this.optionFile = optionFile;
         wireMethodsToOptionFile();
-        sourceNames = optionFile.getSourceNames();
         knownCoreOptionNames = Collections.unmodifiableSet(new HashSet<>(optionFile.getOptions().keySet()));
+        getOutputLevel().convention(JavadocOutputLevel.QUIET);
         getBreakIterator().convention(false);
     }
 
@@ -429,19 +425,11 @@ public abstract class CoreJavadocOptions implements MinimalJavadocOptions {
     }
 
     @Override
-    @ToBeReplacedByLazyProperty
-    public List<String> getSourceNames() {
-        return sourceNames.getValue();
-    }
-
-    @Override
-    public void setSourceNames(List<String> sourceNames) {
-        this.sourceNames.setValue(sourceNames);
-    }
+    public abstract ListProperty<String> getSourceNames();
 
     @Override
     public MinimalJavadocOptions sourceNames(String... sourceNames) {
-        this.sourceNames.getValue().addAll(Arrays.asList(sourceNames));
+        getSourceNames().addAll(Arrays.asList(sourceNames));
         return this;
     }
 
@@ -465,49 +453,33 @@ public abstract class CoreJavadocOptions implements MinimalJavadocOptions {
      * (The version number of the standard doclet appears in its output stream.)
      */
     @Override
-    @ToBeReplacedByLazyProperty
-    public List<String> getJFlags() {
-        return jFlags;
-    }
-
-    @Override
-    public void setJFlags(List<String> jFlags) {
-        this.jFlags = jFlags;
-    }
+    public abstract ListProperty<String> getJFlags();
 
     @Override
     public MinimalJavadocOptions jFlags(String... jFlags) {
-        this.jFlags.addAll(Arrays.asList(jFlags));
+        getJFlags().addAll(jFlags);
         return this;
     }
 
     @Override
     public void contributeCommandLineOptions(ExecSpec execHandleBuilder) {
         execHandleBuilder
-            .args(GUtil.prefix("-J", jFlags)) // J flags can not be set in the option file
-            .args(GUtil.prefix("@", GFileUtils.toPaths(optionFiles))); // add additional option files
+            .args(GUtil.prefix("-J", getJFlags().get())) // J flags can not be set in the option file
+            .args(GUtil.prefix("@", GFileUtils.toPaths(getOptionFiles().getFiles()))); // add additional option files
     }
 
     @Override
-    @ToBeReplacedByLazyProperty
-    public List<File> getOptionFiles() {
-        return optionFiles;
-    }
-
-    @Override
-    public void setOptionFiles(List<File> optionFiles) {
-        this.optionFiles = optionFiles;
-    }
+    public abstract ConfigurableFileCollection getOptionFiles();
 
     @Override
     public MinimalJavadocOptions optionFiles(File... argumentFiles) {
-        this.optionFiles.addAll(Arrays.asList(argumentFiles));
+        getOptionFiles().from((Object[]) argumentFiles);
         return this;
     }
 
     @Override
     public final void write(File outputFile) throws IOException {
-        optionFile.write(outputFile);
+        optionFile.write(outputFile, getSourceNames());
     }
 
     public <T> JavadocOptionFileOption<T> addOption(final JavadocOptionFileOption<T> option) {
@@ -633,13 +605,9 @@ public abstract class CoreJavadocOptions implements MinimalJavadocOptions {
                 .collect(Collectors.joining(", "));
     }
 
-    protected CoreJavadocOptions copy(CoreJavadocOptions original) {
-        return copy(original, new JavadocOptionFile(original.optionFile));
-    }
-
     @SuppressWarnings("unchecked")
-    protected CoreJavadocOptions copy(CoreJavadocOptions original, JavadocOptionFile optionFile) {
-        this.optionFile = optionFile;
+    protected CoreJavadocOptions copy(CoreJavadocOptions original) {
+        this.optionFile = new JavadocOptionFile(original.optionFile);
         getOverview().set((Provider<String>) optionFile.getOption(OPTION_OVERVIEW).getValue());
         getMemberLevel().set((Provider<JavadocMemberLevel>) optionFile.getOption(OPTION_MEMBERLEVEL).getValue());
         getDoclet().set((Provider<String>) optionFile.getOption(OPTION_DOCLET).getValue());
@@ -653,12 +621,11 @@ public abstract class CoreJavadocOptions implements MinimalJavadocOptions {
         getBreakIterator().set((Provider<Boolean>) optionFile.getOption(OPTION_BREAKITERATOR).getValue());
         getLocale().set((Provider<String>) optionFile.getOption(OPTION_LOCALE).getValue());
         getEncoding().set((Provider<String>) optionFile.getOption(OPTION_ENCODING).getValue());
+        getJFlags().set(original.getJFlags());
+        getOptionFiles().setFrom(original.getOptionFiles());
+        getSourceNames().set(original.getSourceNames());
 
         wireMethodsToOptionFile();
-
-        sourceNames = optionFile.getSourceNames();
-        jFlags = original.jFlags;
-        optionFiles = original.optionFiles;
 
         knownCoreOptionNames = original.knownCoreOptionNames;
         return this;
