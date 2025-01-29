@@ -16,12 +16,13 @@
 
 package org.gradle.external.javadoc.internal;
 
+import org.gradle.api.NonNullApi;
 import org.gradle.api.file.ConfigurableFileCollection;
-import org.gradle.api.provider.Property;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
+@NonNullApi
 public class ConfigurableFileCollectionJavadocOptionFileOption extends AbstractJavadocOptionFileOption<ConfigurableFileCollection> {
     public ConfigurableFileCollectionJavadocOptionFileOption(String option, ConfigurableFileCollection value) {
         super(option, value);

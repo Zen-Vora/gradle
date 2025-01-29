@@ -17,7 +17,6 @@
 package org.gradle.external.javadoc;
 
 import org.gradle.api.file.ConfigurableFileCollection;
-import org.gradle.api.internal.provider.ProviderApiDeprecationLogger;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Classpath;
@@ -72,7 +71,7 @@ public interface MinimalJavadocOptions {
     MinimalJavadocOptions doclet(String docletClass);
 
     @Classpath
-    @ReplacesEagerProperty
+    @ReplacesEagerProperty(adapter = MinimalJavadocOptionsAdapters.DocletpathAdapter.class)
     ConfigurableFileCollection getDocletpath();
 
     MinimalJavadocOptions docletpath(File... docletpath);
@@ -85,7 +84,7 @@ public interface MinimalJavadocOptions {
     MinimalJavadocOptions source(String source);
 
     @Internal
-    @ReplacesEagerProperty
+    @ReplacesEagerProperty(adapter = MinimalJavadocOptionsAdapters.ClasspathAdapter.class)
     ConfigurableFileCollection getClasspath();
 
     /**
@@ -94,7 +93,7 @@ public interface MinimalJavadocOptions {
      * @since 6.4
      */
     @Internal
-    @ReplacesEagerProperty
+    @ReplacesEagerProperty(adapter = MinimalJavadocOptionsAdapters.ModulePath.class)
     ConfigurableFileCollection getModulePath();
 
     /**
@@ -109,7 +108,7 @@ public interface MinimalJavadocOptions {
     MinimalJavadocOptions classpath(File... classpath);
 
     @Classpath
-    @ReplacesEagerProperty
+    @ReplacesEagerProperty(adapter = MinimalJavadocOptionsAdapters.BootclasspathAdapter.class)
     ConfigurableFileCollection getBootClasspath();
 
     MinimalJavadocOptions bootClasspath(File... bootClasspath);
@@ -118,7 +117,7 @@ public interface MinimalJavadocOptions {
     @Optional
     @IgnoreEmptyDirectories
     @PathSensitive(PathSensitivity.RELATIVE)
-    @ReplacesEagerProperty
+    @ReplacesEagerProperty(adapter = MinimalJavadocOptionsAdapters.ExtDirsAdapter.class)
     ConfigurableFileCollection getExtDirs();
 
     MinimalJavadocOptions extDirs(File... extDirs);
@@ -144,10 +143,7 @@ public interface MinimalJavadocOptions {
      */
     @Internal
     @Deprecated
-    default Property<Boolean> getIsBreakIterator() {
-        ProviderApiDeprecationLogger.logDeprecation(MinimalJavadocOptions.class, "getIsBreakIterator()", "getBreakIterator()");
-        return getBreakIterator();
-    }
+    Property<Boolean> getIsBreakIterator();
 
     MinimalJavadocOptions breakIterator(boolean breakIterator);
 
@@ -177,7 +173,7 @@ public interface MinimalJavadocOptions {
     @InputFiles
     @Optional
     @PathSensitive(PathSensitivity.NONE)
-    @ReplacesEagerProperty
+    @ReplacesEagerProperty(adapter = MinimalJavadocOptionsAdapters.OptionFilesAdapter.class)
     ConfigurableFileCollection getOptionFiles();
 
     MinimalJavadocOptions optionFiles(File... argumentFiles);

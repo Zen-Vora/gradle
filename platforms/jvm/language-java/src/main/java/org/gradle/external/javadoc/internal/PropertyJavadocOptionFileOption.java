@@ -16,10 +16,12 @@
 
 package org.gradle.external.javadoc.internal;
 
+import org.gradle.api.NonNullApi;
 import org.gradle.api.provider.Property;
 
 import java.io.IOException;
 
+@NonNullApi
 public class PropertyJavadocOptionFileOption extends AbstractJavadocOptionFileOption<Property<?>> {
     public PropertyJavadocOptionFileOption(String option, Property<?> value) {
         super(option, value);

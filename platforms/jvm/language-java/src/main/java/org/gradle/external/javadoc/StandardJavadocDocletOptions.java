@@ -128,11 +128,7 @@ public abstract class StandardJavadocDocletOptions extends CoreJavadocOptions im
 
     @Inject
     public StandardJavadocDocletOptions() {
-        this(new JavadocOptionFile());
-    }
-
-    private StandardJavadocDocletOptions(JavadocOptionFile javadocOptionFile) {
-        super(javadocOptionFile);
+        super(new JavadocOptionFile());
 
         destinationDirectory = addFileOption(OPTION_D);
         use = addBooleanOption(OPTION_USE);
@@ -1132,6 +1128,11 @@ public abstract class StandardJavadocDocletOptions extends CoreJavadocOptions im
         return noComment(true);
     }
 
+    /**
+     * Copies the values of the given {@code StandardJavadocDocletOptions} to this instance.
+     * @since 9.0
+     */
+    @Incubating
     public StandardJavadocDocletOptions copy(StandardJavadocDocletOptions original) {
         super.copy(original);
         destinationDirectory = optionFile.getOption(OPTION_D);

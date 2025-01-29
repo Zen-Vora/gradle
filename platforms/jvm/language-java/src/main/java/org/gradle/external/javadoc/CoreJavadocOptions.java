@@ -18,6 +18,7 @@ package org.gradle.external.javadoc;
 
 import org.gradle.api.Incubating;
 import org.gradle.api.file.ConfigurableFileCollection;
+import org.gradle.api.internal.provider.ProviderApiDeprecationLogger;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
@@ -67,10 +68,6 @@ public abstract class CoreJavadocOptions implements MinimalJavadocOptions {
      */
     @Incubating
     protected Set<String> knownCoreOptionNames;
-
-    public CoreJavadocOptions() {
-        this(new JavadocOptionFile());
-    }
 
     protected CoreJavadocOptions(JavadocOptionFile optionFile) {
         this.optionFile = optionFile;
@@ -370,6 +367,12 @@ public abstract class CoreJavadocOptions implements MinimalJavadocOptions {
     public abstract Property<Boolean> getBreakIterator();
 
     @Override
+    public Property<Boolean> getIsBreakIterator() {
+        ProviderApiDeprecationLogger.logDeprecation(CoreJavadocOptions.class, "getIsBreakIterator()", "getBreakIterator()");
+        return getBreakIterator();
+    }
+
+    @Override
     public MinimalJavadocOptions breakIterator(boolean breakIterator) {
         getBreakIterator().set(breakIterator);
         return this;
@@ -605,6 +608,12 @@ public abstract class CoreJavadocOptions implements MinimalJavadocOptions {
                 .collect(Collectors.joining(", "));
     }
 
+    /**
+     * Copy the values from the given {@link CoreJavadocOptions} to this instance.
+     *
+     * @since 9.0
+     */
+    @Incubating
     @SuppressWarnings("unchecked")
     protected CoreJavadocOptions copy(CoreJavadocOptions original) {
         this.optionFile = new JavadocOptionFile(original.optionFile);
