@@ -97,18 +97,18 @@ public class StandardJavadocDocletOptionsTest {
         assertFalse(options.getNoNavBar());
         assertNull(options.getHelpFile());
         assertNull(options.getStylesheetFile());
-        assertFalse(options.isSerialWarn());
+        assertFalse(options.getSerialWarn());
         assertNull(options.getCharSet());
         assertNull(options.getDocEncoding());
-        assertFalse(options.isKeyWords());
+        assertFalse(options.getKeyWords());
         assertEmpty(options.getTags());
         assertEmpty(options.getTaglets());
         assertEmpty(options.getTagletPath());
-        assertFalse(options.isDocFilesSubDirs());
+        assertFalse(options.getDocFilesSubDirs());
         assertEmpty(options.getExcludeDocFilesSubDir());
         assertEmpty(options.getNoQualifiers());
-        assertTrue(options.isNoTimestamp());
-        assertFalse(options.isNoComment());
+        assertTrue(options.getNoTimestamp());
+        assertFalse(options.getNoComment());
     }
 
     @Test
@@ -372,7 +372,7 @@ public class StandardJavadocDocletOptionsTest {
     @Test
     public void testFluentSerialWarn() {
         assertEquals(options, options.serialWarn());
-        assertTrue(options.isSerialWarn());
+        assertTrue(options.getSerialWarn());
     }
 
     @Test
@@ -392,7 +392,7 @@ public class StandardJavadocDocletOptionsTest {
     @Test
     public void testFluentKeywords() {
         assertEquals(options, options.keyWords());
-        assertTrue(options.isKeyWords());
+        assertTrue(options.getKeyWords());
     }
 
     @Test
@@ -429,7 +429,7 @@ public class StandardJavadocDocletOptionsTest {
     @Test
     public void testFluentDocFilesSubDirs() {
         assertEquals(options, options.docFilesSubDirs());
-        assertTrue(options.isDocFilesSubDirs());
+        assertTrue(options.getDocFilesSubDirs());
     }
 
     @Test
@@ -449,13 +449,13 @@ public class StandardJavadocDocletOptionsTest {
     @Test
     public void testFluentNoTimestamp() {
         assertEquals(options, options.noTimestamp());
-        assertTrue(options.isNoTimestamp());
+        assertTrue(options.getNoTimestamp());
     }
 
     @Test
     public void testFluentNoComment() {
         assertEquals(options, options.noComment());
-        assertTrue(options.isNoComment());
+        assertTrue(options.getNoComment());
     }
 
     @Test

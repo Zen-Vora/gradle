@@ -18,6 +18,7 @@ package org.gradle.external.javadoc;
 
 import com.google.common.collect.Sets;
 import org.gradle.api.Incubating;
+import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.internal.provider.ProviderApiDeprecationLogger;
@@ -33,10 +34,9 @@ import org.gradle.api.tasks.PathSensitive;
 import org.gradle.external.javadoc.internal.GroupsJavadocOptionFileOption;
 import org.gradle.external.javadoc.internal.JavadocOptionFile;
 import org.gradle.external.javadoc.internal.LinksOfflineJavadocOptionFileOption;
+import org.gradle.internal.instrumentation.api.annotations.BytecodeUpgrade;
 import org.gradle.internal.instrumentation.api.annotations.ReplacesEagerProperty;
-import org.gradle.internal.instrumentation.api.annotations.ToBeReplacedByLazyProperty;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.io.File;
 import java.util.ArrayList;
@@ -819,18 +819,14 @@ public abstract class StandardJavadocDocletOptions extends CoreJavadocOptions im
      * <p>
      * javadoc -stylesheetfile C:/user/mystylesheet.css com.mypackage
      */
-    @ToBeReplacedByLazyProperty
-    @Nullable @Optional @PathSensitive(NAME_ONLY) @InputFile
-    public File getStylesheetFile() {
-        return stylesheetFile.getValue();
-    }
-
-    public void setStylesheetFile(@Nullable File stylesheetFile) {
-        this.stylesheetFile.setValue(stylesheetFile);
-    }
+    @InputFile
+    @PathSensitive(NAME_ONLY)
+    @Optional
+    @ReplacesEagerProperty
+    public abstract RegularFileProperty getStylesheetFile();
 
     public StandardJavadocDocletOptions stylesheetFile(File stylesheetFile) {
-        setStylesheetFile(stylesheetFile);
+        getStylesheetFile().set(stylesheetFile);
         return this;
     }
 
@@ -843,17 +839,21 @@ public abstract class StandardJavadocDocletOptions extends CoreJavadocOptions im
      * which helps to properly document default serializable fields and writeExternal methods.
      */
     @Input
-    @ToBeReplacedByLazyProperty
-    public boolean isSerialWarn() {
-        return serialWarn.getValue();
-    }
+    @ReplacesEagerProperty(originalType = boolean.class)
+    public abstract Property<Boolean> getSerialWarn();
 
-    public void setSerialWarn(boolean serialWarn) {
-        this.serialWarn.setValue(serialWarn);
+    /**
+     * This method exists only for Kotlin source backward compatibility.
+     */
+    @Internal
+    @Deprecated
+    public Property<Boolean> getIsSerialWarn() {
+        ProviderApiDeprecationLogger.logDeprecation(StandardJavadocDocletOptions.class, "getIsSerialWarn()", "getSerialWarn()");
+        return getSerialWarn();
     }
 
     public StandardJavadocDocletOptions serialWarn(boolean serialWarn) {
-        setSerialWarn(serialWarn);
+        getSerialWarn().set(serialWarn);
         return this;
     }
 
@@ -875,18 +875,13 @@ public abstract class StandardJavadocDocletOptions extends CoreJavadocOptions im
      * <p>
      * Also see -encoding and -docencoding.
      */
-    @ToBeReplacedByLazyProperty
-    @Nullable @Optional @Input
-    public String getCharSet() {
-        return charSet.getValue();
-    }
-
-    public void setCharSet(@Nullable String charSet) {
-        this.charSet.setValue(charSet);
-    }
+    @Input
+    @Optional
+    @ReplacesEagerProperty
+    public abstract Property<String> getCharSet();
 
     public StandardJavadocDocletOptions charSet(String charSet) {
-        setCharSet(charSet);
+        getCharSet().set(charSet);
         return this;
     }
 
@@ -899,18 +894,13 @@ public abstract class StandardJavadocDocletOptions extends CoreJavadocOptions im
      * <p>
      * Also see -encoding and -charset.
      */
-    @ToBeReplacedByLazyProperty
-    @Nullable @Optional @Input
-    public String getDocEncoding() {
-        return docEncoding.getValue();
-    }
-
-    public void setDocEncoding(@Nullable String docEncoding) {
-        this.docEncoding.setValue(docEncoding);
-    }
+    @Input
+    @Optional
+    @ReplacesEagerProperty
+    public abstract Property<String> getDocEncoding();
 
     public StandardJavadocDocletOptions docEncoding(String docEncoding) {
-        setDocEncoding(docEncoding);
+        getDocEncoding().set(docEncoding);
         return this;
     }
 
@@ -918,17 +908,21 @@ public abstract class StandardJavadocDocletOptions extends CoreJavadocOptions im
      * -keywords.
      */
     @Input
-    @ToBeReplacedByLazyProperty
-    public boolean isKeyWords() {
-        return keyWords.getValue();
-    }
+    @ReplacesEagerProperty(originalType = boolean.class)
+    public abstract Property<Boolean> getKeyWords();
 
-    public void setKeyWords(boolean keyWords) {
-        this.keyWords.setValue(keyWords);
+    /**
+     * This method exists only for Kotlin source backward compatibility.
+     */
+    @Internal
+    @Deprecated
+    public Property<Boolean> getIsKeyWords() {
+        ProviderApiDeprecationLogger.logDeprecation(StandardJavadocDocletOptions.class, "getIsKeyWords()", "getKeyWords()");
+        return getKeyWords();
     }
 
     public StandardJavadocDocletOptions keyWords(boolean keyWords) {
-        setKeyWords(keyWords);
+        getKeyWords().set(keyWords);
         return this;
     }
 
@@ -939,18 +933,13 @@ public abstract class StandardJavadocDocletOptions extends CoreJavadocOptions im
     /**
      * -tag tagname:Xaoptcmf:"taghead".
      */
-    @ToBeReplacedByLazyProperty
-    @Nullable @Optional @Input
-    public List<String> getTags() {
-        return tags.getValue();
-    }
-
-    public void setTags(@Nullable List<String> tags) {
-        this.tags.setValue(tags);
-    }
+    @Input
+    @Optional
+    @ReplacesEagerProperty
+    public abstract ListProperty<String> getTags();
 
     public StandardJavadocDocletOptions tags(List<String> tags) {
-        this.tags.getValue().addAll(tags);
+        getTags().addAll(tags);
         return this;
     }
 
@@ -965,18 +954,13 @@ public abstract class StandardJavadocDocletOptions extends CoreJavadocOptions im
     /**
      * -taglet class.
      */
-    @ToBeReplacedByLazyProperty
-    @Nullable @Optional @Input
-    public List<String> getTaglets() {
-        return taglets.getValue();
-    }
-
-    public void setTaglets(@Nullable List<String> taglets) {
-        this.taglets.setValue(taglets);
-    }
+    @Input
+    @Optional
+    @ReplacesEagerProperty
+    public abstract ListProperty<String> getTaglets();
 
     public StandardJavadocDocletOptions taglets(List<String> taglets) {
-        this.taglets.getValue().addAll(taglets);
+        getTaglets().addAll(taglets);
         return this;
     }
 
@@ -987,18 +971,13 @@ public abstract class StandardJavadocDocletOptions extends CoreJavadocOptions im
     /**
      * -tagletpath tagletpathlist.
      */
-    @ToBeReplacedByLazyProperty
-    @Nullable @Optional @Classpath
-    public List<File> getTagletPath() {
-        return tagletPath.getValue();
-    }
-
-    public void setTagletPath(@Nullable List<File> tagletPath) {
-        this.tagletPath.setValue(tagletPath);
-    }
+    @Optional
+    @Classpath
+    @ReplacesEagerProperty(adapter = StandardJavadocDocletOptions.TagletPathAdapter.class)
+    public abstract ConfigurableFileCollection getTagletPath();
 
     public StandardJavadocDocletOptions tagletPath(List<File> tagletPath) {
-        this.tagletPath.getValue().addAll(tagletPath);
+        getTagletPath().from(tagletPath);
         return this;
     }
 
@@ -1010,17 +989,21 @@ public abstract class StandardJavadocDocletOptions extends CoreJavadocOptions im
      * -docfilessubdirs.
      */
     @Input
-    @ToBeReplacedByLazyProperty
-    public boolean isDocFilesSubDirs() {
-        return docFilesSubDirs.getValue();
-    }
+    @ReplacesEagerProperty(originalType = boolean.class)
+    public abstract Property<Boolean> getDocFilesSubDirs();
 
-    public void setDocFilesSubDirs(boolean docFilesSubDirs) {
-        this.docFilesSubDirs.setValue(docFilesSubDirs);
+    /**
+     * This method exists only for Kotlin source backward compatibility.
+     */
+    @Internal
+    @Deprecated
+    public Property<Boolean> getIsDocFilesSubDirs() {
+        ProviderApiDeprecationLogger.logDeprecation(StandardJavadocDocletOptions.class, "getIsDocFilesSubDirs()", "getDocFilesSubDirs()");
+        return getDocFilesSubDirs();
     }
 
     public StandardJavadocDocletOptions docFilesSubDirs(boolean docFilesSubDirs) {
-        setDocFilesSubDirs(docFilesSubDirs);
+        getDocFilesSubDirs().set(docFilesSubDirs);
         return this;
     }
 
@@ -1031,18 +1014,13 @@ public abstract class StandardJavadocDocletOptions extends CoreJavadocOptions im
     /**
      * -excludedocfilessubdir name1:name2...
      */
-    @ToBeReplacedByLazyProperty
-    @Nullable @Optional @Input
-    public List<String> getExcludeDocFilesSubDir() {
-        return excludeDocFilesSubDir.getValue();
-    }
-
-    public void setExcludeDocFilesSubDir(@Nullable List<String> excludeDocFilesSubDir) {
-        this.excludeDocFilesSubDir.setValue(excludeDocFilesSubDir);
-    }
+    @Input
+    @Optional
+    @ReplacesEagerProperty
+    public abstract ListProperty<String> getExcludeDocFilesSubDir();
 
     public StandardJavadocDocletOptions excludeDocFilesSubDir(List<String> excludeDocFilesSubDir) {
-        this.excludeDocFilesSubDir.getValue().addAll(excludeDocFilesSubDir);
+        getExcludeDocFilesSubDir().addAll(excludeDocFilesSubDir);
         return this;
     }
 
@@ -1053,18 +1031,13 @@ public abstract class StandardJavadocDocletOptions extends CoreJavadocOptions im
     /**
      * -noqualifier all | packagename1:packagename2:...
      */
-    @ToBeReplacedByLazyProperty
-    @Nullable @Optional @Input
-    public List<String> getNoQualifiers() {
-        return noQualifiers.getValue();
-    }
-
-    public void setNoQualifiers(@Nullable List<String> noQualifiers) {
-        this.noQualifiers.setValue(noQualifiers);
-    }
+    @Input
+    @Optional
+    @ReplacesEagerProperty
+    public abstract ListProperty<String> getNoQualifiers();
 
     public StandardJavadocDocletOptions noQualifier(List<String> noQualifiers) {
-        this.noQualifiers.getValue().addAll(noQualifiers);
+        getNoQualifiers().addAll(noQualifiers);
         return this;
     }
 
@@ -1073,17 +1046,21 @@ public abstract class StandardJavadocDocletOptions extends CoreJavadocOptions im
     }
 
     @Input
-    @ToBeReplacedByLazyProperty
-    public boolean isNoTimestamp() {
-        return noTimestamp.getValue();
-    }
+    @ReplacesEagerProperty(originalType = boolean.class)
+    public abstract Property<Boolean> getNoTimestamp();
 
-    public void setNoTimestamp(boolean noTimestamp) {
-        this.noTimestamp.setValue(noTimestamp);
+    /**
+     * This method exists only for Kotlin source backward compatibility.
+     */
+    @Internal
+    @Deprecated
+    public Property<Boolean> getIsNoTimestamp() {
+        ProviderApiDeprecationLogger.logDeprecation(StandardJavadocDocletOptions.class, "getIsNoTimestamp()", "getNoTimestamp()");
+        return getNoTimestamp();
     }
 
     public StandardJavadocDocletOptions noTimestamp(boolean noTimestamp) {
-        setNoTimestamp(noTimestamp);
+        getNoTimestamp().set(noTimestamp);
         return this;
     }
 
@@ -1095,17 +1072,21 @@ public abstract class StandardJavadocDocletOptions extends CoreJavadocOptions im
      * -nocomment.
      */
     @Input
-    @ToBeReplacedByLazyProperty
-    public boolean isNoComment() {
-        return noComment.getValue();
-    }
+    @ReplacesEagerProperty(originalType = boolean.class)
+    public abstract Property<Boolean> getNoComment();
 
-    public void setNoComment(boolean noComment) {
-        this.noComment.setValue(noComment);
+    /**
+     * This method exists only for Kotlin source backward compatibility.
+     */
+    @Internal
+    @Deprecated
+    public Property<Boolean> getIsNoComment() {
+        ProviderApiDeprecationLogger.logDeprecation(StandardJavadocDocletOptions.class, "getIsNoComment()", "getNoComment()");
+        return getNoComment();
     }
 
     public StandardJavadocDocletOptions noComment(boolean noComment) {
-        setNoComment(noComment);
+        getNoComment().set(noComment);
         return this;
     }
 
@@ -1171,5 +1152,20 @@ public abstract class StandardJavadocDocletOptions extends CoreJavadocOptions im
         addPropertyOption(OPTION_VERSION, getVersion());
         addPropertyOption(OPTION_AUTHOR, getAuthor());
         addPropertyOption(OPTION_SPLITINDEX, getSplitIndex());
+    }
+
+    /**
+     * Adapter for {@link StandardJavadocDocletOptions#getTagletPath()}.
+     */
+    static class TagletPathAdapter {
+        @BytecodeUpgrade
+        static List<File> getTagletPath(StandardJavadocDocletOptions self) {
+            return new ArrayList<>(self.getTagletPath().getFiles());
+        }
+
+        @BytecodeUpgrade
+        static void setTagletPath(StandardJavadocDocletOptions self, List<File> tagletPath) {
+            self.getTagletPath().setFrom(tagletPath);
+        }
     }
 }
