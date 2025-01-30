@@ -17,19 +17,24 @@
 package org.gradle.external.javadoc.internal;
 
 import org.gradle.api.file.ConfigurableFileCollection;
+import org.gradle.api.provider.HasMultipleValues;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
+import org.gradle.api.provider.Provider;
 import org.gradle.external.javadoc.JavadocOptionFileOption;
 import org.gradle.internal.Cast;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class JavadocOptionFile {
@@ -81,6 +86,9 @@ public class JavadocOptionFile {
         return addOption(new ConfigurableFileCollectionJavadocOptionFileOption(option, value));
     }
 
+    public JavadocOptionFileOption<Provider<? extends Collection<?>>> addMultiValuePropertyOption(String option, Provider<? extends Collection<?>> value, BiFunction<String, Object, AbstractJavadocOptionFileOption<?>> valueWriter) {
+        return addOption(new MultiValuePropertyJavadocOptionFileOption(option, value, valueWriter));
+    }
 
     public JavadocOptionFileOption<String> addStringOption(String option, String value) {
         return addOption(new StringJavadocOptionFileOption(option, value));

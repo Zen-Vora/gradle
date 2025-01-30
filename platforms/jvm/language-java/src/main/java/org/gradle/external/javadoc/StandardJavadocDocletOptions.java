@@ -22,18 +22,25 @@ import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.internal.provider.ProviderApiDeprecationLogger;
+import org.gradle.api.provider.HasMultipleValues;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.MapProperty;
 import org.gradle.api.provider.Property;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.Classpath;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.PathSensitive;
+import org.gradle.external.javadoc.internal.AbstractJavadocOptionFileOption;
+import org.gradle.external.javadoc.internal.AbstractListJavadocOptionFileOption;
 import org.gradle.external.javadoc.internal.GroupsJavadocOptionFileOption;
 import org.gradle.external.javadoc.internal.JavadocOptionFile;
 import org.gradle.external.javadoc.internal.LinksOfflineJavadocOptionFileOption;
+import org.gradle.external.javadoc.internal.MultilineStringsJavadocOptionFileOption;
+import org.gradle.external.javadoc.internal.StringsJavadocOptionFileOption;
+import org.gradle.internal.Cast;
 import org.gradle.internal.instrumentation.api.annotations.BytecodeUpgrade;
 import org.gradle.internal.instrumentation.api.annotations.ReplacesEagerProperty;
 
@@ -41,12 +48,15 @@ import javax.inject.Inject;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import static org.gradle.api.tasks.PathSensitivity.NAME_ONLY;
 
@@ -1156,12 +1166,9 @@ public abstract class StandardJavadocDocletOptions extends CoreJavadocOptions im
         addPropertyOption(OPTION_DOCTITLE, getDocTitle());
         addPropertyOption(OPTION_FOOTER, getFooter());
         addPropertyOption(OPTION_BOTTOM, getBottom());
-        addPropertyOption(OPTION_LINK, getLinks());
-        addPropertyOption(OPTION_LINKOFFLINE, getLinksOffline());
         addPropertyOption(OPTION_LINKSOURCE, getLinkSource());
         addPropertyOption(OPTION_NODEPRECATED, getNoDeprecated());
         addPropertyOption(OPTION_NODEPRECATEDLIST, getNoDeprecatedList());
-
         addPropertyOption(OPTION_NOSINCE, getNoSince());
         addPropertyOption(OPTION_NOTREE, getNoTree());
         addPropertyOption(OPTION_NOINDEX, getNoIndex());
@@ -1173,19 +1180,28 @@ public abstract class StandardJavadocDocletOptions extends CoreJavadocOptions im
         addPropertyOption(OPTION_CHARSET, getCharSet());
         addPropertyOption(OPTION_DOENCODING, getDocEncoding());
         addPropertyOption(OPTION_KEYWORDS, getKeyWords());
-
         addConfigurableFileCollectionOption(OPTION_TAGLETPATH, getTagletPath());
         addPropertyOption(OPTION_DOCFILESSUBDIRS, getDocFilesSubDirs());
         addPropertyOption(OPTION_NOTIMESTAMP, getNoTimestamp());
         addPropertyOption(OPTION_NOCOMMENT, getNoComment());
 
-        getTags()
-
+        addMultiValuePropertyOption(OPTION_LINK, getLinks(),
+            (option, value) -> new MultilineStringsJavadocOptionFileOption(option, Cast.uncheckedCast(value)));
+        addMultiValuePropertyOption(OPTION_LINKOFFLINE, getLinksOffline(),
+            (option, value) -> new LinksOfflineJavadocOptionFileOption(option, Cast.uncheckedCast(value)));
+        addMultiValuePropertyOption(OPTION_TAG, getTags(),
+            (option, value) -> new MultilineStringsJavadocOptionFileOption(option, Cast.uncheckedCast(value)));
+        addMultiValuePropertyOption(OPTION_TAGLET, getTaglets(),
+            (option, value) -> new MultilineStringsJavadocOptionFileOption(option, Cast.uncheckedCast(value)));
+        addMultiValuePropertyOption(OPTION_EXCLUDEDOCFILESSUBDIR, getExcludeDocFilesSubDir(),
+            (option, value) -> new StringsJavadocOptionFileOption(option, Cast.uncheckedCast(value), ":"));
+        addMultiValuePropertyOption(OPTION_NOQUALIFIER, getNoQualifiers(),
+            (option, value) -> new StringsJavadocOptionFileOption(option, Cast.uncheckedCast(value), ":"));
         groups = addOption(new GroupsJavadocOptionFileOption(OPTION_GROUP, new LinkedHashMap<>()));
-        tags = addMultilineStringsOption(OPTION_TAG);
-        taglets = addMultilineStringsOption(OPTION_TAGLET);
-        excludeDocFilesSubDir = addStringsOption(OPTION_EXCLUDEDOCFILESSUBDIR, ":");
-        noQualifiers = addStringsOption(OPTION_NOQUALIFIER, ":");
+    }
+
+    private void addMultiValuePropertyOption(String option, Provider<? extends Collection<?>> value, BiFunction<String, Object, AbstractJavadocOptionFileOption<?>> valueWriter) {
+        optionFile.addMultiValuePropertyOption(option, value, valueWriter);
     }
 
     /**
