@@ -17,8 +17,10 @@
 package org.gradle.external.javadoc;
 
 import org.gradle.api.file.ConfigurableFileCollection;
+import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.Classpath;
 import org.gradle.api.tasks.Console;
 import org.gradle.api.tasks.IgnoreEmptyDirectories;
@@ -29,10 +31,8 @@ import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.internal.instrumentation.api.annotations.ReplacesEagerProperty;
-import org.gradle.internal.instrumentation.api.annotations.ToBeReplacedByLazyProperty;
 import org.gradle.process.ExecSpec;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -129,8 +129,15 @@ public interface MinimalJavadocOptions {
     MinimalJavadocOptions verbose();
 
     @Internal
-    @ToBeReplacedByLazyProperty
-    boolean isVerbose();
+    @ReplacesEagerProperty(originalType = boolean.class)
+    Provider<Boolean> getVerbose();
+
+    /**
+     * This method exists only for Kotlin source backward compatibility.
+     */
+    @Internal
+    @Deprecated
+    Provider<Boolean> getIsVerbose();
 
     MinimalJavadocOptions quiet();
 
@@ -179,26 +186,22 @@ public interface MinimalJavadocOptions {
     MinimalJavadocOptions optionFiles(File... argumentFiles);
 
     @Internal
-    @ToBeReplacedByLazyProperty
-    File getDestinationDirectory();
-
-    void setDestinationDirectory(@Nullable File directory);
+    @ReplacesEagerProperty
+    DirectoryProperty getDestinationDirectory();
 
     MinimalJavadocOptions destinationDirectory(File directory);
 
-    @ToBeReplacedByLazyProperty
-    @Nullable @Optional @Input
-    String getWindowTitle();
-
-    void setWindowTitle(@Nullable String windowTitle);
+    @Input
+    @Optional
+    @ReplacesEagerProperty
+    Property<String> getWindowTitle();
 
     StandardJavadocDocletOptions windowTitle(String windowTitle);
 
-    @ToBeReplacedByLazyProperty
-    @Nullable @Optional @Input
-    String getHeader();
-
-    void setHeader(@Nullable String header);
+    @Input
+    @Optional
+    @ReplacesEagerProperty
+    Property<String> getHeader();
 
     StandardJavadocDocletOptions header(String header);
 

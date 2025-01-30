@@ -16,6 +16,8 @@
 
 package org.gradle.external.javadoc;
 
+import org.gradle.api.internal.file.FileResolver;
+import org.gradle.api.internal.file.TestFiles;
 import org.gradle.test.fixtures.file.TestFile;
 import org.gradle.test.fixtures.file.TestNameTestDirectoryProvider;
 import org.gradle.util.TestUtil;
@@ -47,6 +49,7 @@ public class StandardJavadocDocletOptionsTest {
     public final TestNameTestDirectoryProvider temporaryFolder = new TestNameTestDirectoryProvider(getClass());
 
     private StandardJavadocDocletOptions options;
+    private final FileResolver fileResolver = TestFiles.resolver(temporaryFolder.getTestDirectory());
 
     @Before
     public void setUp() {
@@ -72,7 +75,7 @@ public class StandardJavadocDocletOptionsTest {
         assertEmpty(options.getSourceNames().get());
         assertEmpty(options.getOptionFiles().getFiles());
         // standard doclet options
-        assertNull(options.getDestinationDirectory());
+        assertNull(options.getDestinationDirectory().getOrNull());
         assertFalse(options.isUse());
         assertFalse(options.isVersion());
         assertFalse(options.isAuthor());
@@ -156,7 +159,7 @@ public class StandardJavadocDocletOptionsTest {
     public void testFluentDocletClasspath() {
         final File[] docletClasspathValue = new File[]{new File("doclet.jar"), new File("doclet-dep.jar")};
         assertEquals(options, options.docletpath(docletClasspathValue));
-        assertArrayEquals(new String[]{"doclet.jar", "doclet-dep.jar"}, options.getDocletpath().getFiles().stream().map(File::getName).toArray());
+        assertArrayEquals(Arrays.stream(docletClasspathValue).map(fileResolver::resolve).toArray(), options.getDocletpath().getFiles().toArray());
     }
 
     @Test
@@ -170,21 +173,21 @@ public class StandardJavadocDocletOptionsTest {
     public void testFluentClasspath() {
         final File[] classpathValue = new File[]{new File("classpath.jar"), new File("classpath-dir")};
         assertEquals(options, options.classpath(classpathValue));
-        assertArrayEquals(new String[]{"classpath.jar", "classpath-dir"}, options.getClasspath().getFiles().stream().map(File::getName).toArray());
+        assertArrayEquals(Arrays.stream(classpathValue).map(fileResolver::resolve).toArray(), options.getClasspath().getFiles().toArray());
     }
 
     @Test
     public void testFluentBootclasspath() {
         final File[] bootClasspathValue = new File[]{new File("bootclasspath.jar"), new File("bootclasspath2.jar")};
         assertEquals(options, options.bootClasspath(bootClasspathValue));
-        assertArrayEquals(new String[]{"bootclasspath.jar", "bootclasspath2.jar"}, options.getBootClasspath().getFiles().stream().map(File::getName).toArray());
+        assertArrayEquals(Arrays.stream(bootClasspathValue).map(fileResolver::resolve).toArray(), options.getBootClasspath().getFiles().toArray());
     }
 
     @Test
     public void testFluentExtDirs() {
         final File[] extDirsValue = new File[]{new File("extDirOne"), new File("extDirTwo")};
         assertEquals(options, options.extDirs(extDirsValue));
-        assertArrayEquals(new String[]{"extDirOne", "extDirTwo"}, options.getExtDirs().getFiles().stream().map(File::getName).toArray());
+        assertArrayEquals(Arrays.stream(extDirsValue).map(fileResolver::resolve).toArray(), options.getExtDirs().getFiles().toArray());
     }
 
     @Test
@@ -197,7 +200,7 @@ public class StandardJavadocDocletOptionsTest {
     public void testVerboseOutputLevel() {
         assertEquals(options, options.verbose());
         assertEquals(JavadocOutputLevel.VERBOSE, options.getOutputLevel().get());
-        assertTrue(options.isVerbose());
+        assertTrue(options.getVerbose().get());
     }
 
     @Test
@@ -224,7 +227,7 @@ public class StandardJavadocDocletOptionsTest {
     public void testFluentDirectory() {
         final File directoryValue = new File("testOutput");
         assertEquals(options, options.destinationDirectory(directoryValue));
-        assertEquals(directoryValue, options.getDestinationDirectory());
+        assertEquals(fileResolver.resolve(directoryValue), options.getDestinationDirectory().getAsFile().get());
     }
 
     @Test

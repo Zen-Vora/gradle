@@ -131,8 +131,7 @@ public abstract class Javadoc extends SourceTask {
             .orElse(javaToolchainService.javadocToolFor(it -> {}));
         this.javadocTool = objectFactory.property(JavadocTool.class).convention(javadocToolConvention);
         this.javadocTool.finalizeValueOnRead();
-        this.optionsDestinationDir = getObjectFactory().directoryProperty()
-            .fileProvider(getProviderFactory().provider(options::getDestinationDirectory));
+        this.optionsDestinationDir = options.getDestinationDirectory();
         this.optionsFile = getObjectFactory().fileProperty()
             .fileProvider(getProviderFactory().provider(() -> new File(getTemporaryDir(), "javadoc.options")));
         getFailOnError().convention(true);
@@ -149,7 +148,7 @@ public abstract class Javadoc extends SourceTask {
 
         StandardJavadocDocletOptions options = getObjectFactory().newInstance(StandardJavadocDocletOptions.class).copy((StandardJavadocDocletOptions) getOptions());
 
-        if (options.getDestinationDirectory() == null) {
+        if (!options.getDestinationDirectory().isPresent()) {
             options.destinationDirectory(destinationDir);
         }
 
@@ -163,10 +162,12 @@ public abstract class Javadoc extends SourceTask {
         }
 
         String title = getTitle().getOrNull();
-        if (!isTrue(options.getWindowTitle()) && isTrue(title)) {
+        String windowTitle = options.getWindowTitle().getOrNull();
+        String docTitle = options.getDocTitle();
+        if (!isTrue(windowTitle) && isTrue(title)) {
             options.windowTitle(title);
         }
-        if (!isTrue(options.getDocTitle()) && isTrue(title)) {
+        if (!isTrue(docTitle) && isTrue(title)) {
             options.setDocTitle(title);
         }
 
@@ -287,7 +288,7 @@ public abstract class Javadoc extends SourceTask {
             .willBeRemovedInGradle9()
             .withUpgradeGuideSection(8, "deprecated_javadoc_verbose")
             .nagUser();
-        return options.isVerbose();
+        return options.getVerbose().get();
     }
 
     /**

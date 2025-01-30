@@ -17,6 +17,7 @@
 package org.gradle.external.javadoc.internal;
 
 import org.gradle.api.NonNullApi;
+import org.gradle.api.file.FileSystemLocation;
 import org.gradle.api.provider.Property;
 
 import java.io.IOException;
@@ -37,6 +38,8 @@ public class PropertyJavadocOptionFileOption extends AbstractJavadocOptionFileOp
                 new StringJavadocOptionFileOption(option, (String) rawValue).write(writerContext);
             } else if (rawValue instanceof Boolean) {
                 new BooleanJavadocOptionFileOption(option, (Boolean) rawValue).write(writerContext);
+            } else if (rawValue instanceof FileSystemLocation) {
+                new FileJavadocOptionFileOption(option, ((FileSystemLocation) rawValue).getAsFile()).write(writerContext);
             } else {
                 throw new UnsupportedOperationException("Unsupported property type: " + rawValue.getClass());
             }

@@ -27,7 +27,6 @@ import org.gradle.external.javadoc.internal.JavadocOptionFile;
 import org.gradle.external.javadoc.internal.JavadocOptionFileOptionInternal;
 import org.gradle.external.javadoc.internal.JavadocOptionFileOptionInternalAdapter;
 import org.gradle.internal.Cast;
-import org.gradle.internal.instrumentation.api.annotations.ToBeReplacedByLazyProperty;
 import org.gradle.process.ExecSpec;
 import org.gradle.util.internal.GFileUtils;
 import org.gradle.util.internal.GUtil;
@@ -323,9 +322,15 @@ public abstract class CoreJavadocOptions implements MinimalJavadocOptions {
     }
 
     @Override
-    @ToBeReplacedByLazyProperty
-    public boolean isVerbose() {
-        return getOutputLevel().map(outputLevel -> outputLevel == JavadocOutputLevel.VERBOSE).getOrElse(false);
+    public Provider<Boolean> getVerbose() {
+        return getOutputLevel().map(outputLevel -> outputLevel == JavadocOutputLevel.VERBOSE);
+    }
+
+    @Override
+    @Deprecated
+    public Provider<Boolean> getIsVerbose() {
+        ProviderApiDeprecationLogger.logDeprecation(CoreJavadocOptions.class, "getIsVerbose()", "getVerbose()");
+        return getVerbose();
     }
 
     @Override
@@ -367,6 +372,7 @@ public abstract class CoreJavadocOptions implements MinimalJavadocOptions {
     public abstract Property<Boolean> getBreakIterator();
 
     @Override
+    @Deprecated
     public Property<Boolean> getIsBreakIterator() {
         ProviderApiDeprecationLogger.logDeprecation(CoreJavadocOptions.class, "getIsBreakIterator()", "getBreakIterator()");
         return getBreakIterator();
@@ -496,11 +502,11 @@ public abstract class CoreJavadocOptions implements MinimalJavadocOptions {
         return optionFile.addStringOption(option);
     }
 
-    private void addPropertyOption(String option, Property<?> value) {
+    void addPropertyOption(String option, Property<?> value) {
         optionFile.addPropertyOption(option, value);
     }
 
-    private void addConfigurableFileCollectionOption(String option, ConfigurableFileCollection value) {
+    void addConfigurableFileCollectionOption(String option, ConfigurableFileCollection value) {
         optionFile.addConfigurableFileCollectionOption(option, value);
     }
 

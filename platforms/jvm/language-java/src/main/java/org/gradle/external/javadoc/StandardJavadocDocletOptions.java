@@ -18,6 +18,8 @@ package org.gradle.external.javadoc;
 
 import com.google.common.collect.Sets;
 import org.gradle.api.Incubating;
+import org.gradle.api.file.DirectoryProperty;
+import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Classpath;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
@@ -82,13 +84,10 @@ public abstract class StandardJavadocDocletOptions extends CoreJavadocOptions im
     private static final String OPTION_NOTIMESTAMP = "notimestamp";
     private static final String OPTION_NOCOMMENT = "nocomment";
 
-    private JavadocOptionFileOption<File> destinationDirectory;
     private JavadocOptionFileOption<Boolean> use;
     private JavadocOptionFileOption<Boolean> version;
     private JavadocOptionFileOption<Boolean> author;
     private JavadocOptionFileOption<Boolean> splitIndex;
-    private JavadocOptionFileOption<String> windowTitle;
-    private JavadocOptionFileOption<String> header;
     private JavadocOptionFileOption<String> docTitle;
     private JavadocOptionFileOption<String> footer;
     private JavadocOptionFileOption<String> bottom;
@@ -129,14 +128,10 @@ public abstract class StandardJavadocDocletOptions extends CoreJavadocOptions im
     @Inject
     public StandardJavadocDocletOptions() {
         super(new JavadocOptionFile());
-
-        destinationDirectory = addFileOption(OPTION_D);
         use = addBooleanOption(OPTION_USE);
         version = addBooleanOption(OPTION_VERSION);
         author = addBooleanOption(OPTION_AUTHOR);
         splitIndex = addBooleanOption(OPTION_SPLITINDEX);
-        header = addStringOption(OPTION_HEADER);
-        windowTitle = addStringOption(OPTION_WINDOWTITLE);
         docTitle = addStringOption(OPTION_DOCTITLE);
         footer = addStringOption(OPTION_FOOTER);
         bottom = addStringOption(OPTION_BOTTOM);
@@ -165,7 +160,7 @@ public abstract class StandardJavadocDocletOptions extends CoreJavadocOptions im
         noQualifiers = addStringsOption(OPTION_NOQUALIFIER, ":");
         noTimestamp = addBooleanOption(OPTION_NOTIMESTAMP, true);
         noComment = addBooleanOption(OPTION_NOCOMMENT);
-
+        wireMethodsToOptionFile();
         knownStandardOptionNames = Collections.unmodifiableSet(new HashSet<>(Sets.difference(optionFile.getOptions().keySet(), knownCoreOptionNames)));
     }
 
@@ -194,19 +189,11 @@ public abstract class StandardJavadocDocletOptions extends CoreJavadocOptions im
      * javadoc -d /user/doc com.mypackage
      */
     @Override
-    @ToBeReplacedByLazyProperty
-    public File getDestinationDirectory() {
-        return destinationDirectory.getValue();
-    }
-
-    @Override
-    public void setDestinationDirectory(File directory) {
-        this.destinationDirectory.setValue(directory);
-    }
+    public abstract DirectoryProperty getDestinationDirectory();
 
     @Override
     public StandardJavadocDocletOptions destinationDirectory(File destinationDirectory) {
-        setDestinationDirectory(destinationDirectory);
+        getDestinationDirectory().set(destinationDirectory);
         return this;
     }
 
@@ -332,19 +319,11 @@ public abstract class StandardJavadocDocletOptions extends CoreJavadocOptions im
      * javadoc -windowtitle "Java 2 Platform" com.mypackage
      */
     @Override
-    @ToBeReplacedByLazyProperty
-    public String getWindowTitle() {
-        return windowTitle.getValue();
-    }
-
-    @Override
-    public void setWindowTitle(String windowTitle) {
-        this.windowTitle.setValue(windowTitle);
-    }
+    public abstract Property<String> getWindowTitle();
 
     @Override
     public StandardJavadocDocletOptions windowTitle(String windowTitle) {
-        setWindowTitle(windowTitle);
+        getWindowTitle().set(windowTitle);
         return this;
     }
 
@@ -357,22 +336,13 @@ public abstract class StandardJavadocDocletOptions extends CoreJavadocOptions im
      * javadoc -header "<b>Java 2 Platform </b><br>v1.4" com.mypackage
      */
     @Override
-    @ToBeReplacedByLazyProperty
-    public String getHeader() {
-        return header.getValue();
-    }
-
-    @Override
-    public void setHeader(String header) {
-        this.header.setValue(header);
-    }
+    public abstract Property<String> getHeader();
 
     @Override
     public StandardJavadocDocletOptions header(String header) {
-        setHeader(header);
+        getHeader().set(header);
         return this;
     }
-
 
     /**
      * -doctitle title
@@ -1133,15 +1103,16 @@ public abstract class StandardJavadocDocletOptions extends CoreJavadocOptions im
      * @since 9.0
      */
     @Incubating
+    @SuppressWarnings("unchecked")
     public StandardJavadocDocletOptions copy(StandardJavadocDocletOptions original) {
         super.copy(original);
-        destinationDirectory = optionFile.getOption(OPTION_D);
+        getDestinationDirectory().set((DirectoryProperty) optionFile.getOption(OPTION_D).getValue());
+        getWindowTitle().set((Property<String>) optionFile.getOption(OPTION_WINDOWTITLE).getValue());
+        getHeader().set((Property<String>) optionFile.getOption(OPTION_HEADER).getValue());
         use = optionFile.getOption(OPTION_USE);
         version = optionFile.getOption(OPTION_VERSION);
         author = optionFile.getOption(OPTION_AUTHOR);
         splitIndex = optionFile.getOption(OPTION_SPLITINDEX);
-        header = optionFile.getOption(OPTION_HEADER);
-        windowTitle = optionFile.getOption(OPTION_WINDOWTITLE);
         docTitle = optionFile.getOption(OPTION_DOCTITLE);
         footer = optionFile.getOption(OPTION_FOOTER);
         bottom = optionFile.getOption(OPTION_BOTTOM);
@@ -1171,7 +1142,15 @@ public abstract class StandardJavadocDocletOptions extends CoreJavadocOptions im
         noTimestamp = optionFile.getOption(OPTION_NOTIMESTAMP);
         noComment = optionFile.getOption(OPTION_NOCOMMENT);
 
+        wireMethodsToOptionFile();
+
         knownStandardOptionNames = original.knownStandardOptionNames;
         return this;
+    }
+
+    private void wireMethodsToOptionFile() {
+        addPropertyOption(OPTION_D, getDestinationDirectory());
+        addPropertyOption(OPTION_WINDOWTITLE, getWindowTitle());
+        addPropertyOption(OPTION_HEADER, getHeader());
     }
 }
