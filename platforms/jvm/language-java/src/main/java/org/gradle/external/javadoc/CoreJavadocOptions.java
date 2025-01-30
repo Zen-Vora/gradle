@@ -16,10 +16,14 @@
 
 package org.gradle.external.javadoc;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import org.gradle.api.Incubating;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.internal.provider.ProviderApiDeprecationLogger;
+import org.gradle.api.provider.HasMultipleValues;
 import org.gradle.api.provider.ListProperty;
+import org.gradle.api.provider.MapProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.Input;
@@ -34,29 +38,53 @@ import org.gradle.util.internal.GUtil;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
  * Provides the core Javadoc Options. That is, provides the options which are not doclet specific.
  */
 public abstract class CoreJavadocOptions implements MinimalJavadocOptions {
-    private static final String OPTION_OVERVIEW = "overview";
-    private static final String OPTION_MEMBERLEVEL = "memberLevel";
-    private static final String OPTION_DOCLET = "doclet";
-    private static final String OPTION_DOCLETPATH = "docletpath";
-    private static final String OPTION_SOURCE = "source";
-    private static final String OPTION_CLASSPATH = "classpath";
-    private static final String OPTION_MODULE_PATH = "-module-path";
-    private static final String OPTION_BOOTCLASSPATH = "bootclasspath";
-    private static final String OPTION_EXTDIRS = "extdirs";
-    private static final String OPTION_OUTPUTLEVEL = "outputLevel";
-    private static final String OPTION_BREAKITERATOR = "breakiterator";
-    private static final String OPTION_LOCALE = "locale";
-    private static final String OPTION_ENCODING = "encoding";
+    private enum KnownOption {
+        OPTION_OVERVIEW("overview", CoreJavadocOptions::getOverview),
+        OPTION_MEMBERLEVEL("memberLevel", CoreJavadocOptions::getMemberLevel),
+        OPTION_DOCLET("doclet", CoreJavadocOptions::getDoclet),
+        OPTION_DOCLETPATH("docletpath", CoreJavadocOptions::getDocletpath),
+        OPTION_SOURCE("source", CoreJavadocOptions::getSource),
+        OPTION_CLASSPATH("classpath", CoreJavadocOptions::getClasspath),
+        OPTION_MODULE_PATH("-module-path", CoreJavadocOptions::getModulePath),
+        OPTION_BOOTCLASSPATH("bootclasspath", CoreJavadocOptions::getBootClasspath),
+        OPTION_EXTDIRS("extdirs", CoreJavadocOptions::getExtDirs),
+        OPTION_OUTPUTLEVEL("outputLevel", CoreJavadocOptions::getOutputLevel),
+        OPTION_BREAKITERATOR("breakiterator", CoreJavadocOptions::getBreakIterator),
+        OPTION_LOCALE("locale", CoreJavadocOptions::getLocale),
+        OPTION_ENCODING("encoding", CoreJavadocOptions::getEncoding);
+
+        private final String option;
+        @SuppressWarnings("ImmutableEnumChecker")
+        private final Function<CoreJavadocOptions, Object> richProperty;
+
+        KnownOption(String option, Function<CoreJavadocOptions, Object> richProperty) {
+            this.option = option;
+            this.richProperty = richProperty;
+        }
+    }
+
+    static final List<KnownOption> KNOWN_OPTIONS;
+    static final Set<String> KNOWN_OPTION_NAMES;
+
+    static {
+        ImmutableList.Builder<KnownOption> knownOptions = ImmutableList.builder();
+        for (KnownOption knownOption : KnownOption.values()) {
+            knownOptions.add(knownOption);
+        }
+        KNOWN_OPTIONS = knownOptions.build();
+        KNOWN_OPTION_NAMES = KNOWN_OPTIONS.stream()
+            .map(option -> option.option)
+            .collect(ImmutableSet.toImmutableSet());
+    }
 
     protected JavadocOptionFile optionFile;
 
@@ -70,8 +98,7 @@ public abstract class CoreJavadocOptions implements MinimalJavadocOptions {
 
     protected CoreJavadocOptions(JavadocOptionFile optionFile) {
         this.optionFile = optionFile;
-        wireMethodsToOptionFile();
-        knownCoreOptionNames = Collections.unmodifiableSet(new HashSet<>(optionFile.getOptions().keySet()));
+        addKnownOptionsToOptionFile();
         getOutputLevel().convention(JavadocOutputLevel.QUIET);
         getBreakIterator().convention(false);
     }
@@ -84,7 +111,7 @@ public abstract class CoreJavadocOptions implements MinimalJavadocOptions {
      */
     @Incubating
     public Set<String> knownOptionNames() {
-        return knownCoreOptionNames;
+        return CoreJavadocOptions.KNOWN_OPTION_NAMES;
     }
 
     /**
@@ -620,45 +647,61 @@ public abstract class CoreJavadocOptions implements MinimalJavadocOptions {
      * @since 9.0
      */
     @Incubating
-    @SuppressWarnings("unchecked")
     protected CoreJavadocOptions copy(CoreJavadocOptions original) {
         this.optionFile = new JavadocOptionFile(original.optionFile);
-        getOverview().set((Provider<String>) optionFile.getOption(OPTION_OVERVIEW).getValue());
-        getMemberLevel().set((Provider<JavadocMemberLevel>) optionFile.getOption(OPTION_MEMBERLEVEL).getValue());
-        getDoclet().set((Provider<String>) optionFile.getOption(OPTION_DOCLET).getValue());
-        getDocletpath().setFrom(optionFile.getOption(OPTION_DOCLETPATH).getValue());
-        getSource().set((Provider<String>) optionFile.getOption(OPTION_SOURCE).getValue());
-        getClasspath().setFrom(optionFile.getOption(OPTION_CLASSPATH).getValue());
-        getModulePath().setFrom(optionFile.getOption(OPTION_MODULE_PATH).getValue());
-        getBootClasspath().setFrom(optionFile.getOption(OPTION_BOOTCLASSPATH).getValue());
-        getExtDirs().setFrom(optionFile.getOption(OPTION_EXTDIRS).getValue());
-        getOutputLevel().set((Provider<JavadocOutputLevel>) optionFile.getOption(OPTION_OUTPUTLEVEL).getValue());
-        getBreakIterator().set((Provider<Boolean>) optionFile.getOption(OPTION_BREAKITERATOR).getValue());
-        getLocale().set((Provider<String>) optionFile.getOption(OPTION_LOCALE).getValue());
-        getEncoding().set((Provider<String>) optionFile.getOption(OPTION_ENCODING).getValue());
+        copyKnownOptions();
+        addKnownOptionsToOptionFile();
         getJFlags().set(original.getJFlags());
         getOptionFiles().setFrom(original.getOptionFiles());
         getSourceNames().set(original.getSourceNames());
-
-        wireMethodsToOptionFile();
-
-        knownCoreOptionNames = original.knownCoreOptionNames;
         return this;
     }
 
-    private void wireMethodsToOptionFile() {
-        addPropertyOption(OPTION_OVERVIEW, getOverview());
-        addPropertyOption(OPTION_MEMBERLEVEL, getMemberLevel());
-        addPropertyOption(OPTION_DOCLET, getDoclet());
-        addConfigurableFileCollectionOption(OPTION_DOCLETPATH, getDocletpath());
-        addPropertyOption(OPTION_SOURCE, getSource());
-        addConfigurableFileCollectionOption(OPTION_CLASSPATH, getClasspath());
-        addConfigurableFileCollectionOption(OPTION_MODULE_PATH, getModulePath());
-        addConfigurableFileCollectionOption(OPTION_BOOTCLASSPATH, getBootClasspath());
-        addConfigurableFileCollectionOption(OPTION_EXTDIRS, getExtDirs());
-        addPropertyOption(OPTION_OUTPUTLEVEL, getOutputLevel());
-        addPropertyOption(OPTION_BREAKITERATOR, getBreakIterator());
-        addPropertyOption(OPTION_LOCALE, getLocale());
-        addPropertyOption(OPTION_ENCODING, getEncoding());
+    private void copyKnownOptions() {
+        for (KnownOption knownOption : KNOWN_OPTIONS) {
+            copyKnownOptionValue(knownOption.option, knownOption.richProperty.apply(this), optionFile);
+        }
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    void copyKnownOptionValue(String option, Object richProperty, JavadocOptionFile optionFile) {
+        if (richProperty instanceof Property) {
+            ((Property<?>) richProperty).set((Provider) optionFile.getOption(option).getValue());
+        } else if (richProperty instanceof HasMultipleValues) {
+            ((HasMultipleValues<?>) richProperty).set((Provider) optionFile.getOption(option).getValue());
+        } else if (richProperty instanceof MapProperty) {
+            ((MapProperty<?, ?>) richProperty).set((Provider) optionFile.getOption(option).getValue());
+        } else if (richProperty instanceof ConfigurableFileCollection) {
+            ((ConfigurableFileCollection) richProperty).setFrom(optionFile.getOption(option).getValue());
+        } else {
+            throw new IllegalStateException("Unknown rich property type: " + richProperty + " for option: " + option);
+        }
+    }
+
+    private void addKnownOptionsToOptionFile() {
+        for (KnownOption knownOption : KNOWN_OPTIONS) {
+            Object richProperty = knownOption.richProperty.apply(this);
+            switch (knownOption) {
+                case OPTION_OVERVIEW:
+                case OPTION_MEMBERLEVEL:
+                case OPTION_DOCLET:
+                case OPTION_SOURCE:
+                case OPTION_OUTPUTLEVEL:
+                case OPTION_BREAKITERATOR:
+                case OPTION_LOCALE:
+                case OPTION_ENCODING:
+                    addPropertyOption(knownOption.option, (Property<?>) richProperty);
+                    break;
+                case OPTION_DOCLETPATH:
+                case OPTION_CLASSPATH:
+                case OPTION_MODULE_PATH:
+                case OPTION_BOOTCLASSPATH:
+                case OPTION_EXTDIRS:
+                    addConfigurableFileCollectionOption(knownOption.option, (ConfigurableFileCollection) richProperty);
+                    break;
+                default:
+                    throw new IllegalStateException("Unknown known option: " + knownOption);
+            }
+        }
     }
 }
