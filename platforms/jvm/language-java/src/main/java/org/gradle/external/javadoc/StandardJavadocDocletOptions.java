@@ -163,6 +163,7 @@ public abstract class StandardJavadocDocletOptions extends CoreJavadocOptions im
         getUse().convention(false);
         getVersion().convention(false);
         getAuthor().convention(false);
+        getNoTimestamp().convention(true);
     }
 
     /**
@@ -1152,6 +1153,39 @@ public abstract class StandardJavadocDocletOptions extends CoreJavadocOptions im
         addPropertyOption(OPTION_VERSION, getVersion());
         addPropertyOption(OPTION_AUTHOR, getAuthor());
         addPropertyOption(OPTION_SPLITINDEX, getSplitIndex());
+        addPropertyOption(OPTION_DOCTITLE, getDocTitle());
+        addPropertyOption(OPTION_FOOTER, getFooter());
+        addPropertyOption(OPTION_BOTTOM, getBottom());
+        addPropertyOption(OPTION_LINK, getLinks());
+        addPropertyOption(OPTION_LINKOFFLINE, getLinksOffline());
+        addPropertyOption(OPTION_LINKSOURCE, getLinkSource());
+        addPropertyOption(OPTION_NODEPRECATED, getNoDeprecated());
+        addPropertyOption(OPTION_NODEPRECATEDLIST, getNoDeprecatedList());
+
+        addPropertyOption(OPTION_NOSINCE, getNoSince());
+        addPropertyOption(OPTION_NOTREE, getNoTree());
+        addPropertyOption(OPTION_NOINDEX, getNoIndex());
+        addPropertyOption(OPTION_NOHELP, getNoHelp());
+        addPropertyOption(OPTION_NONAVBAR, getNoNavBar());
+        addPropertyOption(OPTION_HELPFILE, getHelpFile());
+        addPropertyOption(OPTION_STYLESHEETFILE, getStylesheetFile());
+        addPropertyOption(OPTION_SERIALWARN, getSerialWarn());
+        addPropertyOption(OPTION_CHARSET, getCharSet());
+        addPropertyOption(OPTION_DOENCODING, getDocEncoding());
+        addPropertyOption(OPTION_KEYWORDS, getKeyWords());
+
+        addConfigurableFileCollectionOption(OPTION_TAGLETPATH, getTagletPath());
+        addPropertyOption(OPTION_DOCFILESSUBDIRS, getDocFilesSubDirs());
+        addPropertyOption(OPTION_NOTIMESTAMP, getNoTimestamp());
+        addPropertyOption(OPTION_NOCOMMENT, getNoComment());
+
+        getTags()
+
+        groups = addOption(new GroupsJavadocOptionFileOption(OPTION_GROUP, new LinkedHashMap<>()));
+        tags = addMultilineStringsOption(OPTION_TAG);
+        taglets = addMultilineStringsOption(OPTION_TAGLET);
+        excludeDocFilesSubDir = addStringsOption(OPTION_EXCLUDEDOCFILESSUBDIR, ":");
+        noQualifiers = addStringsOption(OPTION_NOQUALIFIER, ":");
     }
 
     /**
