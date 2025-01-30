@@ -26,8 +26,6 @@ import org.gradle.util.internal.VersionNumber
 
 // These imports are required, IntelliJ incorrectly thinks that they are not used because old versions of Groovy
 // permitted subtypes to use the parent type's methods without importing them
-import static org.gradle.test.precondition.TestPrecondition.satisfied;
-import static org.gradle.test.precondition.TestPrecondition.notSatisfied;
 
 class IntegTestPreconditions {
 
@@ -38,6 +36,10 @@ class IntegTestPreconditions {
         }
     }
 
+    /**
+     * @deprecated Avoid using this precondition. Please refactor your integration test to support regular executor or use a unit test.
+     * */
+    @Deprecated
     static final class IsEmbeddedExecutor implements TestPrecondition {
         @Override
         boolean isSatisfied() throws Exception {
@@ -48,14 +50,14 @@ class IntegTestPreconditions {
     static final class NotEmbeddedExecutor implements TestPrecondition {
         @Override
         boolean isSatisfied() throws Exception {
-            return notSatisfied(IsEmbeddedExecutor)
+            return !GradleContextualExecuter.isEmbedded()
         }
     }
 
     static final class NotEmbeddedExecutorOrNotWindows implements TestPrecondition {
         @Override
         boolean isSatisfied() throws Exception {
-            return notSatisfied(IsEmbeddedExecutor) || notSatisfied(UnitTestPreconditions.Windows)
+            return !GradleContextualExecuter.isEmbedded() || notSatisfied(UnitTestPreconditions.Windows)
         }
     }
 
