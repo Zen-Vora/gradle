@@ -76,25 +76,25 @@ public class StandardJavadocDocletOptionsTest {
         assertEmpty(options.getOptionFiles().getFiles());
         // standard doclet options
         assertNull(options.getDestinationDirectory().getOrNull());
-        assertFalse(options.isUse());
-        assertFalse(options.isVersion());
-        assertFalse(options.isAuthor());
-        assertFalse(options.isSplitIndex());
+        assertFalse(options.getUse().get());
+        assertFalse(options.getVersion().get());
+        assertFalse(options.getAuthor().get());
+        assertFalse(options.getSplitIndex().get());
         assertNull(options.getWindowTitle());
         assertNull(options.getDocTitle());
         assertNull(options.getFooter());
         assertNull(options.getBottom());
         assertEmpty(options.getLinks());
         assertEmpty(options.getLinksOffline());
-        assertFalse(options.isLinkSource());
+        assertFalse(options.getLinkSource());
         assertEmpty(options.getGroups());
-        assertFalse(options.isNoDeprecated());
-        assertFalse(options.isNoDeprecatedList());
-        assertFalse(options.isNoSince());
-        assertFalse(options.isNoTree());
-        assertFalse(options.isNoIndex());
-        assertFalse(options.isNoHelp());
-        assertFalse(options.isNoNavBar());
+        assertFalse(options.getNoDeprecated());
+        assertFalse(options.getNoDeprecatedList());
+        assertFalse(options.getNoSince());
+        assertFalse(options.getNoTree());
+        assertFalse(options.getNoIndex());
+        assertFalse(options.getNoHelp());
+        assertFalse(options.getNoNavBar());
         assertNull(options.getHelpFile());
         assertNull(options.getStylesheetFile());
         assertFalse(options.isSerialWarn());
@@ -233,25 +233,25 @@ public class StandardJavadocDocletOptionsTest {
     @Test
     public void testFluentUse() {
         assertEquals(options, options.use());
-        assertTrue(options.isUse());
+        assertTrue(options.getUse().get());
     }
 
     @Test
     public void testFluentVersion() {
         assertEquals(options, options.version());
-        assertTrue(options.isVersion());
+        assertTrue(options.getVersion().get());
     }
 
     @Test
     public void testFluentAuthor() {
         assertEquals(options, options.author());
-        assertTrue(options.isAuthor());
+        assertTrue(options.getAuthor().get());
     }
 
     @Test
     public void testFluentSplitIndex() {
         assertEquals(options, options.splitIndex());
-        assertTrue(options.isSplitIndex());
+        assertTrue(options.getSplitIndex().get());
     }
 
     @Test
@@ -301,7 +301,7 @@ public class StandardJavadocDocletOptionsTest {
     @Test
     public void testFluentLinkSource() {
         assertEquals(options, options.linkSource());
-        assertTrue(options.isLinkSource());
+        assertTrue(options.getLinkSource());
     }
 
     @Test
@@ -322,37 +322,37 @@ public class StandardJavadocDocletOptionsTest {
     @Test
     public void testFluentNoDeprecated() {
         assertEquals(options, options.noDeprecated());
-        assertTrue(options.isNoDeprecated());
+        assertTrue(options.getNoDeprecated());
     }
 
     @Test
     public void testFluentNoDeprecatedList() {
         assertEquals(options, options.noDeprecatedList());
-        assertTrue(options.isNoDeprecatedList());
+        assertTrue(options.getNoDeprecatedList());
     }
 
     @Test
     public void testFluentNoSince() {
         assertEquals(options, options.noSince());
-        assertTrue(options.isNoSince());
+        assertTrue(options.getNoSince());
     }
 
     @Test
     public void testFluentNoTree() {
         assertEquals(options, options.noTree());
-        assertTrue(options.isNoTree());
+        assertTrue(options.getNoTree());
     }
 
     @Test
     public void testFluentNoIndex() {
         assertEquals(options, options.noIndex());
-        assertTrue(options.isNoIndex());
+        assertTrue(options.getNoIndex());
     }
 
     @Test
     public void testFluentNoNavBar() {
         assertEquals(options, options.noNavBar());
-        assertTrue(options.isNoNavBar());
+        assertTrue(options.getNoNavBar());
     }
 
     @Test
