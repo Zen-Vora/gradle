@@ -163,12 +163,12 @@ public abstract class Javadoc extends SourceTask {
 
         String title = getTitle().getOrNull();
         String windowTitle = options.getWindowTitle().getOrNull();
-        String docTitle = options.getDocTitle();
+        String docTitle = options.getDocTitle().getOrNull();
         if (!isTrue(windowTitle) && isTrue(title)) {
             options.windowTitle(title);
         }
         if (!isTrue(docTitle) && isTrue(title)) {
-            options.setDocTitle(title);
+            options.getDocTitle().set(title);
         }
 
         String maxMemory = getMaxMemory().getOrNull();

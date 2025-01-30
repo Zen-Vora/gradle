@@ -90,6 +90,10 @@ public class JavadocOptionFile {
         return addOption(new MultiValuePropertyJavadocOptionFileOption(option, value, valueWriter));
     }
 
+    public JavadocOptionFileOption<Provider<? extends Map<?, ?>>> addMapPropertyOption(String option, Provider<? extends Map<?, ?>> value, BiFunction<String, Object, AbstractJavadocOptionFileOption<?>> valueWriter) {
+        return addOption(new MapPropertyJavadocOptionFileOption(option, value, valueWriter));
+    }
+
     public JavadocOptionFileOption<String> addStringOption(String option, String value) {
         return addOption(new StringJavadocOptionFileOption(option, value));
     }
