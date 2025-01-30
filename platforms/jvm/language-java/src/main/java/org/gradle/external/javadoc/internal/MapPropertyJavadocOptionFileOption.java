@@ -16,6 +16,7 @@
 
 package org.gradle.external.javadoc.internal;
 
+import org.gradle.api.NonNullApi;
 import org.gradle.api.provider.Provider;
 import org.gradle.internal.Cast;
 
@@ -23,6 +24,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.function.BiFunction;
 
+@NonNullApi
 public class MapPropertyJavadocOptionFileOption extends AbstractJavadocOptionFileOption<Provider<? extends Map<?, ?>>> {
     private final BiFunction<String, Object, AbstractJavadocOptionFileOption<?>> valueWriter;
 
